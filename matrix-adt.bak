@@ -8,12 +8,9 @@
     ; Deze procedure zal de vector in de 'let' initialiseren met
     ; vectoren van gelijke grootte
     (define (vul-vector)
-      (let loop
-        ((huidige-idx 0))
-        (if (< huidige-idx aantal-rijen-aliens)
-            (begin
-              (vector-set! vector huidige-idx (make-vector aantal-aliens-per-rij))
-              (loop (+ huidige-idx 1))))))
+      (vector-set! vector 0 (make-vector aantal-aliens-per-rij))
+      (vector-set! vector 1 (make-vector aantal-aliens-per-rij))
+      (vector-set! vector 2 (make-vector aantal-aliens-per-rij)))
 
     (vul-vector)
     vector))
