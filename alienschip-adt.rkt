@@ -1,0 +1,28 @@
+;;            ----------------
+;; ----------  Alienschip ADT  ----------
+;;            ----------------
+
+
+(define (maak-alienschip positie)
+
+  ; de beweeg! functie die de beweeg van positie gaat aanroepen
+  ; om zo de raket naar links of rechts te laten bewegen afhankelijk van het richtingsargument
+  (define (beweeg! richting)
+    ((positie 'beweeg!) richting))
+
+
+  ; rand-geraakt? : / -> /
+  (define (rand-geraakt?)
+    ((positie 'rand?)))
+
+  ; schiet! operatie gaat een nieuwe kogel aanmaken op de positie van het alienschip
+  (define (schiet!)
+    (maak-kogel positie))
+
+  ; de dispatch functie
+  (define (dispatch-alienschip msg)
+    (cond((eq? msg 'beweeg) beweeg!)
+         ((eq? msg 'positie) positie)
+         ((eq? msg 'schiet) schiet!)
+         ((eq? msg 'rand-geraakt?) rand-geraakt?)))
+  dispatch-alienschip)
