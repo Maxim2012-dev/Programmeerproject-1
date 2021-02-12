@@ -2,9 +2,12 @@
 
 ;;;;*----------------------------------*;;;;
 ;;;;*       >>> Graphics.rkt  <<<      *;;;;
-;;;;* > Programmeerproject 2019-2020 < *;;;;
+;;;;* > Programmeerproject 2020-2021 < *;;;;
 ;;;;*                                  *;;;;
-;;;;*         >>  Versie 1  <<         *;;;;
+;;;;*         >>  Versie _  <<         *;;;;
+;;;;*                                  *;;;;
+;;;;*         Test-versie voor:        *;;;;
+;;;;*        Maxim Lino Brabants       *;;;;
 ;;;;*                                  *;;;;
 ;;;;*            Adapted by:           *;;;;
 ;;;;*           Bjarno Oeyen           *;;;;
@@ -22,14 +25,6 @@
 
 ;; In Racket projects, include this library using
 ;; (require "Graphics.rkt")
-
-;; Zet deze boolean op #t om ervoor te zorgen dat een toets die ingedrukt blijft
-;; niet continu `'pressed <key>` stuurt naar de key callback handler.
-(define ignore-held-key #f)
-;; Het veranderen van code in bestaande libraries is geen goed gebruik van
-;; bestaande code! Maar dit is de eenvoudigste methode om het gedrag van de
-;; bibliotheek licht aan te passen, zonder handmatig dit gedrag zelfstandig
-;; toe te voegen aan de code.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -59,9 +54,12 @@
 ;;;; changing the x-value of a tile will update the canvas.
 ;;;;---------------------------------------------------------------------
 
+(define default-maximum-fps 60)
 (define fps-refresh-time 1000)
+(define ignore-held-key #f)
+(define default-background-colour "black")
 
-(define (make-window w h title (target-fps 60))
+(define (make-window w h title (maximum-fps default-maximum-fps))
   (let* ((show-fps #t)
          (fps 0)
          (fps-accum-dt 0)
@@ -148,11 +146,10 @@
     (define frame
       (new closing-frame%
            [label title]
+           ; Windows does some weird stuff regarding window width/height...
            [width w]
-           [height (if (eq? (system-type 'os) 'windows)
-                       (+ h 30) ; Windows only: take border into account
-                       h)]))
-    
+           [height h]))
+
     ;; Create the canvas with the custom paint-callback 
     ;; This paint-callback is called each time the canvas is refreshed.
     ;; How fast the canvas is refreshed is handled later.
@@ -178,15 +175,14 @@
     ;; Here we handle how fast the canvas is refreshed and thereby how 
     ;; fast paint-callback will be called. 
     (define (launch-game-loop)
-      (let* ((max-fps 500)          ;; The maximum frames per seconds
-             (min-wait-per-frame 1) ; apparently this has to be at least 1 to avoid locking up.
-             (ms-per-frame (quotient 1000 max-fps))) ; calculate the MINIMUM delta-time in ms between two frames.
+      (let* ((min-wait-per-frame 1) ; apparently this has to be at least 1 to avoid locking up.
+             (ms-per-frame (quotient 1000 maximum-fps))) ; calculate the MINIMUM delta-time in ms between two frames.
         
         ;; calculate the min delta-time given the min-wait-per-frame
         (define (calculate-interval)
           (truncate (max  
-                      (- ms-per-frame delta-time) 
-                      min-wait-per-frame)))
+                     (- ms-per-frame delta-time) 
+                     min-wait-per-frame)))
         
         ;; The heart of the self-sustaning loop.
         (define (game-loop)  
@@ -211,6 +207,17 @@
               (new timer% [notify-callback game-loop] 
                    [interval (calculate-interval) ]
                    [just-once? #t]))))
+
+    (define (adjust-size) ;; Some operating systems do not properly initialise the size of the window, compute a correction, and apply it
+      (define-values (size-w size-h) (send frame get-size))
+      (define-values (client-size-w client-size-h) (send frame get-client-size))
+      (display "user-size: ") (display (list w h)) (newline)
+      (display "window-size: ") (display (list size-w size-h)) (newline)
+      (display "client-size: ") (display (list client-size-w client-size-h)) (newline)
+      (define correction-w (- w client-size-w))
+      (define correction-h (- h client-size-h))
+      (display "correction: ") (display (list correction-w correction-h)) (newline)
+      (send frame resize (+ w correction-w) (+ h correction-h)))
     
     ;; dispatch
     (define (dispatch msg)
@@ -223,15 +230,19 @@
                                          "message"
                                          msg)))) 
     
-    ;; show the frame.
-    (send frame show #t)
-    
     ;; set background
-    (set-background! "black")
+    (set-background! default-background-colour)
     
-    ;; and finally launch the self-sustaining game-loop.
+    ;; launch the self-sustaining game-loop.
     (launch-game-loop)
+
+    ;; adjust the size of the window
+    (adjust-size)
+
+    ;; Show the window
+    (send frame show #t)
     (send canvas focus)
+    
     dispatch))
 
 ;;;;################################ BITMAP WITH ROTATED DC MATRIX #######################################
@@ -292,10 +303,13 @@
 ;;;; generate-mask generates a mask and saves it to disk.
 ;;;; String String -> void
 ;;;;---------------------------------------------------------------------
-(define (generate-mask bitmappath background-color)
+(define (generate-mask bitmappath background-color (overwrite 'ask))
   (when (string? background-color) (set! background-color (send the-color-database find-color background-color)))
   (define bitmap (get-bitmap bitmappath))
   (define dc (new bitmap-dc% [bitmap bitmap]))
+  (define white-pixel (make-object color% "white"))
+  (define black-pixel (make-object color% "black"))
+  (printf "Generating mask for ~a...~n" bitmappath)
   (for ([w (send bitmap get-width)])
     (for ([h (send bitmap get-height)])
       (define pixel (make-object color%))
@@ -303,11 +317,18 @@
       (if (and (= (send background-color red) (send pixel red))
                (= (send background-color blue) (send pixel blue))
                (= (send background-color green) (send pixel green)))
-          
-          (send dc set-pixel w h (make-object color% "white"))
-          (send dc set-pixel w h (make-object color% "black")))))
-  
-  (send (send dc get-bitmap) save-file (string-replace bitmappath ".png" "_mask.png") 'png))
+          (send dc set-pixel w h white-pixel)
+          (send dc set-pixel w h black-pixel))))
+  (define extension (path-get-extension bitmappath))
+  (when (not extension) (raise 'unknown-extension))
+  (define extension-str (bytes->string/utf-8 extension))
+  (define old-suffix extension-str)
+  (define new-suffix "_mask.png")
+  (define maskpath (string-replace bitmappath old-suffix new-suffix))
+  (printf "Saving mask to ~a...~n" bitmappath)
+  (define save-result (send (send dc get-bitmap) save-file maskpath 'png))
+  (when (not save-result) (raise 'save-failed))
+  (void))
 
 
 ;;;;################################ TILES #######################################
@@ -328,10 +349,10 @@
 (define (make-tile w h [bitmap #f] [mask #f])
   (when (string? bitmap) (set! bitmap (get-bitmap bitmap)))
   (when (string? mask) (set! mask (get-bitmap mask)))
-  (when (not bitmap) (set! bitmap (make-object bitmap% w h #f #t )))
+  (when (not bitmap) (set! bitmap (make-object bitmap% w h #f #t)))
   (define bufferbitmap (make-object bitmap% w h #f #t))
   (let* ((x 0) 
-         (y 0) 
+         (y 0)
          (update-callback  (lambda () #t))
          (rotated-bitmap (make-object bitmap% w h #f #t ))
          (rotated-bitmap-dc (new bitmap-dc% [bitmap rotated-bitmap]))
