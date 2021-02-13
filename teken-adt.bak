@@ -106,8 +106,7 @@
     (define (dispatch-teken msg)
       (cond ((eq? msg 'set-toets-functie!) set-toets-functie!)
             ((eq? msg 'set-spel-lus-functie!) set-spel-lus-functie!)
-            ((eq? msg 'teken-spel!) teken-spel!)
-            (else (display "geen geldige boodschap"))))
+            ((eq? msg 'teken-spel!) teken-spel!)))
 
     dispatch-teken))
 

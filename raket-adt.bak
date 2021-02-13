@@ -15,10 +15,10 @@
         ((positie 'beweeg!) richting)
         (let ((x (positie 'x)))
                  ; linkerrand geraakt (dan mag je alleen naar rechts)
-          (cond ((and (= x 0) (eq? richting 'rechts))
+          (cond ((and (< x 0) (eq? richting 'rechts))
                  ((positie 'beweeg!) richting))
                  ; rechterrand geraakt (dan mag je alleen naar links)
-                ((and (= x (- spel-breedte 1)) (eq? richting 'links))
+                ((and (> x spel-breedte) (eq? richting 'links))
                  ((positie 'beweeg!) richting))))))
 
   

@@ -27,7 +27,7 @@
 
   ; Checken of de x-coördinaten niet buiten het speelveld treden
   (define (rand?)
-    (or (= x 0) (= x (- spel-breedte 1))))
+    (or (< x 0) (> x spel-breedte)))
 
   ; Procedure die een positieverandering gaat doen door
   ; een aanpassing aan de x- of y-coördinaat afhankelijk van de meegegeven richting
