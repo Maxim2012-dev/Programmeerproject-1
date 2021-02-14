@@ -12,7 +12,7 @@
          (size (vector-length schepen)))
 
 
-    (define (afstand-tussen-rijen idx) (* 2 idx))
+    (define (afstand-tussen-rijen idx) (* 1 idx))
     (define (afstand-tussen-kolommen idx) (* 2 idx))
 
     ; Elke plaats in de vector opvullen met een alienschip object
@@ -61,7 +61,6 @@
       (let ((test-list '()))
         (voor-alle-schepen (lambda (schip)
                              (set! test-list (cons ((schip 'rand-geraakt?)) test-list))))
-        (display test-list)
         (if (not (member #t test-list))
             (voor-alle-schepen roep-beweeg-op)
             (begin (switch!)
