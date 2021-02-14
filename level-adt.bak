@@ -9,9 +9,7 @@
           (maak-positie 0 (- aantal-cellen-hoogte 8)))
          (raket-adt (maak-raket raket-start-positie))
          (alienvloot-adt (maak-alienvloot))
-         (kogel-adt #f)
-         (vloot-tijd 0)
-         (kogel-tijd 0))
+         (vloot-tijd 0))
 
     ;; beweeg-raket! : symbol -> /
     (define (beweeg-raket! toets)
@@ -24,17 +22,6 @@
     ;; beweeg-vloot! : / -> /
     (define (beweeg-vloot!)
       ((alienvloot-adt 'beweeg)))
-
-
-    ;; vuur-kogel-af! : symbol -> /
-    (define (vuur-kogel-af! toets)
-      (if (eq? toets '#\space)
-          (set! kogel-adt (raket-adt 'schiet!))))
-
-
-    ;; beweeg-kogel! : / -> /
-    (define (beweeg-kogel!)
-      (kogel-adt 'beweeg!))
     
 
     ;; update! : number -> /
@@ -42,28 +29,18 @@
       (set! vloot-tijd (+ vloot-tijd 10))
       (if (= vloot-tijd snelheid-vloot)
           (begin (beweeg-vloot!)
-                 (set! vloot-tijd 0)))
-      ; Als er een kogel bestaat dan beweeg je hem
-      (set! kogel-tijd (+ kogel-tijd 10))
-      (if (and kogel-adt (= kogel-tijd snelheid-kogel))
-          (begin (beweeg-kogel!)
-                 (set! kogel-tijd 0))))
-    
+                 (set! vloot-tijd 0))))
     
     ;; toets! : any -> /
     (define (toets! toets)
-      (beweeg-raket! toets)
-      (vuur-kogel-af! toets))
-    
+      (beweeg-raket! toets))
     
     ; Dispatch
     (define (dispatch-level msg)
       (cond ((eq? msg 'update!) update!)
             ((eq? msg 'toets!) toets!)
             ((eq? msg 'raket) raket-adt)
-            ((eq? msg 'kogel) kogel-adt)
-            ((eq? msg 'alienvloot) alienvloot-adt)
-            (else (display "ongeldige boodschap"))))
+            ((eq? msg 'alienvloot) alienvloot-adt)))
 
     dispatch-level))
             

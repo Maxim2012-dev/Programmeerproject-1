@@ -1,8 +1,8 @@
-(define cel-breedte-px 32)
-(define cel-hoogte-px 16)
+(define cel-breedte-px 50)
+(define cel-hoogte-px 50)
 
-(define spel-breedte 25)
-(define spel-hoogte 25)
+(define spel-breedte 20)
+(define spel-hoogte 20)
 
 (define venster-breedte-px (* cel-breedte-px spel-breedte))
 (define venster-hoogte-px (* cel-hoogte-px spel-hoogte))
@@ -11,3 +11,4 @@
 (define aantal-aliens-per-rij 7)
 
 (define snelheid-vloot 1000)
+(define snelheid-kogel 100)

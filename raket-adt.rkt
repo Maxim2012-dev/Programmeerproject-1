@@ -33,7 +33,9 @@
   ; de dispatch functie
   (define (dispatch-raket msg)
     (cond((eq? msg 'beweeg!) beweeg!)
-         ((eq? msg 'positie) positie)))
+         ((eq? msg 'positie) positie)
+         ((eq? msg 'schiet!) schiet!)
+         (else (display "ongeldige boodschap"))))
   dispatch-raket)
 
   
