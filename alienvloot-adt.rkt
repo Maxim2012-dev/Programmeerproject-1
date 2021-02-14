@@ -13,7 +13,7 @@
 
 
     (define (afstand-tussen-rijen idx) (* 1 idx))
-    (define (afstand-tussen-kolommen idx) (* 2 idx))
+    (define (afstand-tussen-kolommen idx) (* 1 idx))
 
     ; Elke plaats in de vector opvullen met een alienschip object
     (define (vul-vloot)

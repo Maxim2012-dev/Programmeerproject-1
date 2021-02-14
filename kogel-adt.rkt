@@ -11,10 +11,6 @@
       ((positie 'beweeg!) 'omhoog))
 
 
-    (define (vuur-af!)
-      (set! afgeschoten? #t))
-
-
     ;; dispatch functie
     (define (dispatch-kogel msg)
       (cond ((eq? msg 'positie) positie)

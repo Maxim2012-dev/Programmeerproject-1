@@ -24,8 +24,11 @@
     (define alien-laag (scherm 'make-layer))
     (define alien-tiles '())
 
-    ; Kogellaag aanmaken
+    ; Kogellaag en tile aanmaken
     (define kogel-laag (scherm 'make-layer))
+    (define kogel-tile
+      (make-bitmap-tile "afbeeldingen/kogel.png"))
+    (define kogel-tiles '())
 
     ;; voeg-alienschip-toe! : alienschip -> tile
     ; Maakt een bitmap-tile aan voor een bepaald alienschipobject
@@ -49,11 +52,20 @@
 
     ;; voeg-kogel-toe! : / -> tile
     ; maakt een nieuwe tile aan en voegt deze toe aan de laag en geeft deze dan terug
-    (define (voeg-kogel-toe!)
+    (define (voeg-kogel-toe! kogel-adt)
       (let ((nieuwe-tile
              (make-bitmap-tile "afbeeldingen/kogel.png")))
+        (set! kogel-tiles (cons (cons kogel-adt nieuwe-tile) kogel-tiles))
         ((kogel-laag 'add-drawable) nieuwe-tile)
         nieuwe-tile))
+
+
+    ;; neem-kogel : kogel -> tile
+    (define (neem-kogel kogel-adt)
+      (let ((resultaat (assoc kogel-adt kogel-tiles)))
+        (if resultaat
+            (cdr resultaat)
+            (voeg-kogel-toe! kogel-adt))))
     
 
 
@@ -89,7 +101,7 @@
     (define (teken-level! level-adt)
       (teken-raket! (level-adt 'raket))
       (teken-vloot! (level-adt 'alienvloot))
-      (teken-kogel! (level-adt 'kogel)))
+      (teken-kogels! (level-adt 'kogels)))
 
     ;; Alienschip
     ;; teken-alienschip! : Alienschip -> /
@@ -107,9 +119,13 @@
     ;; Kogel
     ;; teken-kogel! : Kogel -> /
     (define (teken-kogel! kogel-adt)
-      (if kogel-adt
-          (let ((tile (voeg-kogel-toe!)))
-            (teken-object! kogel-adt tile))))
+      (let ((tile (neem-kogel kogel-adt)))
+          (teken-object! kogel-adt kogel-tile)))
+
+
+    (define (teken-kogels! kogels-lijst)
+      (let ((lijst (kogels-lijst 'kogels-lijst)))
+        ((kogels-lijst 'voor-alle-kogels) teken-kogel!)))
     
 
     ;; Callbacks instellen

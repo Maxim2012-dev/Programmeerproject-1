@@ -6,6 +6,7 @@
 (load "constanten.rkt")
 (load "level-adt.rkt")
 (load "kogel-adt.rkt")
+(load "kogels-adt.rkt")
 
 ; instantie maken van spel-adt om het spel op te starten
 (define spel (maak-spel))

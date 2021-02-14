@@ -29,12 +29,12 @@
     ;; vuur-kogel-af! : symbol -> /
     (define (vuur-kogel-af! toets)
       (if (eq? toets '#\space)
-          (set! kogel-adt (raket-adt 'schiet!))))
+          (set! kogel-adt ((raket-adt 'schiet!)))))
 
 
     ;; beweeg-kogel! : / -> /
     (define (beweeg-kogel!)
-      (kogel-adt 'beweeg!))
+      ((kogel-adt 'beweeg!)))
     
 
     ;; update! : number -> /
@@ -45,7 +45,7 @@
                  (set! vloot-tijd 0)))
       ; Als er een kogel bestaat dan beweeg je hem
       (set! kogel-tijd (+ kogel-tijd 10))
-      (if (and kogel-adt (= kogel-tijd snelheid-kogel))
+      (if (and kogel-adt (>= kogel-tijd snelheid-kogel))
           (begin (beweeg-kogel!)
                  (set! kogel-tijd 0))))
     

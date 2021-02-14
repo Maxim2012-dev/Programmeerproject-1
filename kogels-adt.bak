@@ -1,0 +1,5 @@
+(define (maak-kogels-lijst)
+  (let ((kogels '()))
+
+    (define (voeg-kogel-toe! kogel-adt)
+      (set! kogels (cons kogel-adt kogels))

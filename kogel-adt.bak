@@ -7,6 +7,7 @@
 
     ;; beweeg! : / -> /
     (define (beweeg!)
+      (display (positie 'y)) (newline)
       ((positie 'beweeg!) 'omhoog))
 
 
@@ -17,6 +18,7 @@
     ;; dispatch functie
     (define (dispatch-kogel msg)
       (cond ((eq? msg 'positie) positie)
-            (else (display "ongeldige boodschap"))))
+            ((eq? msg 'beweeg!) beweeg!)
+            (else (display "ongeldige boodschap - kogel"))))
 
     dispatch-kogel))
