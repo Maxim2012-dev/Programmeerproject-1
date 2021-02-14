@@ -28,14 +28,14 @@
 
   ; schiet! operatie gaat een nieuwe kogel aanmaken op de positie van de raket
   (define (schiet!)
-    (maak-kogel (maak-positie (positie 'x) (positie 'y))))
+    (maak-kogel positie))
 
   ; de dispatch functie
   (define (dispatch-raket msg)
     (cond((eq? msg 'beweeg!) beweeg!)
          ((eq? msg 'positie) positie)
          ((eq? msg 'schiet!) schiet!)
-         (else (display "ongeldige boodschap - raket"))))
+         (else (display "ongeldige boodschap"))))
   dispatch-raket)
 
   

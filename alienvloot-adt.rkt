@@ -79,7 +79,7 @@
       (cond ((eq? msg 'beweeg) beweeg!)
             ((eq? msg 'schepen) schepen)
             ((eq? msg 'voor-alle-schepen) voor-alle-schepen)
-            (else "verkeerde boodschap")))
+            (else "verkeerde boodschap - alienvloot")))
     dispatch-alienvloot))
                   
               
