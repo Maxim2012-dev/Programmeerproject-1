@@ -26,6 +26,8 @@
 
     ; Kogellaag en tile aanmaken
     (define kogel-laag (scherm 'make-layer))
+    (define kogel-tile
+      (make-bitmap-tile "afbeeldingen/kogel.png"))
     (define kogel-tiles '())
 
     ;; voeg-alienschip-toe! : alienschip -> tile
@@ -118,7 +120,7 @@
     ;; teken-kogel! : Kogel -> /
     (define (teken-kogel! kogel-adt)
       (let ((tile (neem-kogel kogel-adt)))
-          (teken-object! kogel-adt tile)))
+          (teken-object! kogel-adt kogel-tile)))
 
 
     (define (teken-kogels! kogels-lijst)

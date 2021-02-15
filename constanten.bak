@@ -7,8 +7,8 @@
 (define venster-breedte-px (* cel-breedte-px spel-breedte))
 (define venster-hoogte-px (* cel-hoogte-px spel-hoogte))
 
-(define aantal-rijen-aliens 5)
-(define aantal-aliens-per-rij 11)
+(define aantal-rijen-aliens 4)
+(define aantal-aliens-per-rij 7)
 
-(define snelheid-vloot 1000)
+(define snelheid-vloot 800)
 (define snelheid-kogel 100)

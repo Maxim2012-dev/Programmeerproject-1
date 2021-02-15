@@ -1,4 +1,4 @@
-(define (maak-kogels-lijst)
+(define (maak-kogels-adt)
   (let ((kogels-lijst '()))
 
     (define (voeg-kogel-toe! kogel-adt)
@@ -11,6 +11,7 @@
             (begin (fun (car list))
                    (iter (cdr list)))))
       (iter kogels-lijst))
+
 
     ;; dispatch functie
     (define (dispatch-kogels msg)

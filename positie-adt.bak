@@ -38,7 +38,6 @@
       ((eq? richting 'omlaag) (y! (+ y 1)))
       ((eq? richting 'links) (x! (- x 1)))
       ((eq? richting 'rechts) (x! (+ x 1)))
-      ((eq? richting 'stop) (x! x))
       (else (display "geen geldige richting"))))
 
   ; de overeenkomstige dispatch procedure waarmee er
