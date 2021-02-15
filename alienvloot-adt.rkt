@@ -2,7 +2,7 @@
 ;; ----------  Alienvloot ADT  ----------
 ;;            ----------------
 
-(load "matrix-adt.rkt")
+(load "matrix.rkt")
 (load "alienschip-adt.rkt")
 (load "positie-adt.rkt")
 
@@ -13,7 +13,7 @@
 
 
     (define (afstand-tussen-rijen idx) (* 1 idx))
-    (define (afstand-tussen-kolommen idx) (+ 8 idx))
+    (define (afstand-tussen-kolommen idx) (* 2 idx))
 
     ; Elke plaats in de vector opvullen met een alienschip object
     (define (vul-vloot)

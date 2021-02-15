@@ -58,19 +58,28 @@
     (define (check-geraakt kogels-adt alienvloot-adt)
       (let ((kogels-lijst (kogels-adt 'kogels-lijst))
             (aliens-lijst (alienvloot-adt 'schepen)))
+        ; itereren over alle kogels
         (define (iter kogels-lijst aliens-lijst)
-          )
+          (if (not (null? kogels-lijst))
+              (let ((kogel (car kogels-lijst)))
+                ((alienvloot-adt 'voor-alle-schepen) (lambda (schip) (if (eq? (schip 'positie)
+                                                                              (kogel 'positie))
+                                                                         (verwijder-uit-lijst schip kogel))))
+                (iter (cdr kogels-lijst) aliens-lijst))))
       (iter kogels-lijst aliens-lijst)))
+
+
+    (define (verwijder-uit-lijst alienschip-adt kogel-adt)
+      ((kogels-adt 'verwijder-kogel!) kogel-adt))
     
 
     ;; update! : number -> /
     (define (update! tijdsverschil)
       (set! vloot-tijd (+ vloot-tijd tijdsverschil))
       (beweeg-vloot!)
-      ; Als er een kogel bestaat dan beweeg je hem
       (set! kogel-tijd (+ kogel-tijd tijdsverschil))
-      (beweeg-kogels!))
-     ; (check-geraakt kogels-adt alienvloot-adt))
+      (beweeg-kogels!)
+      (check-geraakt kogels-adt alienvloot-adt))
     
     
     ;; toets! : any -> /

@@ -7,7 +7,6 @@
 
     ;; beweeg! : / -> /
     (define (beweeg!)
-      (display (positie 'y)) (newline)
       ((positie 'beweeg!) 'omhoog))
 
 
