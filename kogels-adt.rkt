@@ -2,7 +2,7 @@
   (let ((kogels-lijst '()))
 
     (define (voeg-kogel-toe! kogel-adt)
-      (set! kogels (cons kogel-adt kogels-lijst)))
+      (set! kogels-lijst (cons kogel-adt kogels-lijst)))
 
 
     (define (voor-alle-kogels fun)
