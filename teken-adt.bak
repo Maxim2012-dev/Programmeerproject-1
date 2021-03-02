@@ -119,11 +119,8 @@
     (define (teken-kogel! kogel-adt)
       (let ((tile (neem-kogel kogel-adt)))
           (teken-object! kogel-adt tile)))
-    
 
-    (define (verwijder-kogel! kogel-adt)
-      (let ((tile (neem-kogel kogel-adt)))
-        ((kogel-laag 'remove-drawable) tile)))
+    (define (verwijder-kogel!  
 
 
     (define (teken-kogels! kogels-lijst)
@@ -147,7 +144,6 @@
       (cond ((eq? msg 'set-toets-functie!) set-toets-functie!)
             ((eq? msg 'set-spel-lus-functie!) set-spel-lus-functie!)
             ((eq? msg 'teken-spel!) teken-spel!)
-            ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
             (else (display "geen geldige boodschap"))))
 
     dispatch-teken))

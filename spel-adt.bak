@@ -22,7 +22,7 @@
     ; Om de zoveel tijd de spelsituatie automatisch bijwerken en alles tekenen.
     ; We geven de dispatch functie mee zodat de teken-functies kunnen aangeroepen worden.
     (define (spel-lus-functie tijdsverschil)
-      ((level-adt 'update!) tijdsverschil teken-adt)
+      ((level-adt 'update!) tijdsverschil)
       ((teken-adt 'teken-spel!) dispatch-spel))
     
     

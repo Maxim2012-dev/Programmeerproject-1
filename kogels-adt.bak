@@ -18,7 +18,7 @@
         (if (not (null? lijst))
             (cond ((eq? kogel-adt (car lijst))
                    (set! kogels-lijst (cdr lijst)))
-                  ((eq? kogel-adt (cadr lijst))
+                  ((eq? kogels-adt (cadr lijst))
                    (set-cdr! lijst (cddr lijst)))
                   (else (iter (cdr lijst))))))
       (iter kogels-lijst))

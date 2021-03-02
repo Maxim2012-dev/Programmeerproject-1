@@ -33,8 +33,8 @@
     (define (vuur-kogel-af! toets)
       (if (eq? toets '#\space)
           ((kogels-adt 'voeg-kogel-toe!) (maak-kogel (maak-positie
-                                                      ((raket-adt 'positie) 'x)
-                                                      ((raket-adt 'positie) 'y))))))
+                                                  ((raket-adt 'positie) 'x)
+                                                  ((raket-adt 'positie) 'y))))))
 
 
     ;; beweeg-kogel! : / -> /
@@ -49,40 +49,37 @@
 
     (define (roep-beweeg-op kogel-adt)
       (let* ((y ((kogel-adt 'positie) 'y))
-             (raakt-rand? (< y 0)))
+            (raakt-rand? (< y 0)))
         (if (not raakt-rand?)
             ((kogel-adt 'beweeg!))
             ((kogel-adt 'stop)))))
 
 
-    (define (check-geraakt kogels-adt alienvloot-adt teken-adt)
+    (define (check-geraakt kogels-adt alienvloot-adt)
       (let ((kogels-lijst (kogels-adt 'kogels-lijst))
             (aliens-lijst (alienvloot-adt 'schepen)))
         ; itereren over alle kogels
         (define (iter kogels-lijst aliens-lijst)
           (if (not (null? kogels-lijst))
               (let ((kogel (car kogels-lijst)))
-                ((alienvloot-adt 'voor-alle-schepen) (lambda (alien) (if (((alien 'positie) 'gelijk?)
-                                                                          (kogel 'positie))
-                                                                         (begin (verwijder-uit-lijst alien kogel)
-                                                                                ((teken-adt 'verwijder-kogel!) kogel)))))
+                ((alienvloot-adt 'voor-alle-schepen) (lambda (alien) (if (eq? (alien 'positie)
+                                                                              (kogel 'positie))
+                                                                         (verwijder-uit-lijst schip kogel))))
                 (iter (cdr kogels-lijst) aliens-lijst))))
-        (iter kogels-lijst aliens-lijst)))
+      (iter kogels-lijst aliens-lijst)))
 
 
     (define (verwijder-uit-lijst alienschip-adt kogel-adt)
-      ((kogels-adt 'verwijder-kogel!) kogel-adt)
-      ((alienvloot-adt 'verwijder-schip!) alienschip-adt))
-    
+      ((kogels-adt 'verwijder-kogel!) kogel-adt))
     
 
     ;; update! : number -> /
-    (define (update! tijdsverschil teken-adt)
+    (define (update! tijdsverschil)
       (set! vloot-tijd (+ vloot-tijd tijdsverschil))
       (beweeg-vloot!)
       (set! kogel-tijd (+ kogel-tijd tijdsverschil))
       (beweeg-kogels!)
-      (check-geraakt kogels-adt alienvloot-adt teken-adt))
+      (check-geraakt kogels-adt alienvloot-adt))
     
     
     ;; toets! : any -> /

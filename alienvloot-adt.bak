@@ -48,8 +48,7 @@
 
 
     (define (verwijder-schip! alienschip-adt)
-      (voor-alle-schepen (lambda (alien) (if (eq? alien alienschip-adt)
-                                             (((alien 'positie) 'y!) y-buiten-speelveld)))))
+      
     
 
     ; switch! : / -> /
@@ -83,7 +82,6 @@
     (define (dispatch-alienvloot msg)
       (cond ((eq? msg 'beweeg) beweeg!)
             ((eq? msg 'schepen) schepen)
-            ((eq? msg 'verwijder-schip!) verwijder-schip!)
             ((eq? msg 'voor-alle-schepen) voor-alle-schepen)
             (else "verkeerde boodschap - alienvloot")))
     dispatch-alienvloot))

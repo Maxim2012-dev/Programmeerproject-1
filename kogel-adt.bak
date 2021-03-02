@@ -3,7 +3,8 @@
 ;;            -----------
 
 (define (maak-kogel positie)
-  (let ((type 'kogel))
+  (let ((afgeschoten? #f)
+        (type 'kogel))
 
     ;; beweeg! : / -> /
     (define (beweeg!)
@@ -18,7 +19,6 @@
       (cond ((eq? msg 'positie) positie)
             ((eq? msg 'beweeg!) beweeg!)
             ((eq? msg 'stop) stop)
-            ((eq? msg 'type) type)
             (else (display "ongeldige boodschap - kogel"))))
 
     dispatch-kogel))
