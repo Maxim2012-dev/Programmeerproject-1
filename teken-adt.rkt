@@ -31,8 +31,10 @@
     ;; voeg-alienschip-toe! : alienschip -> tile
     ; Maakt een bitmap-tile aan voor een bepaald alienschipobject
     (define (voeg-alienschip-toe! alienschip-adt)
-      (let ((nieuwe-tile
-              (make-bitmap-tile "afbeeldingen/alien.png")))
+      (let* ((kleur (alienschip-adt 'kleur))
+            (nieuwe-tile (cond ((eq? kleur 'groen) (make-bitmap-tile "afbeeldingen/alien.png"))
+                               ((eq? kleur 'blauw) (make-bitmap-tile "afbeeldingen/alien.png"))
+                               ((eq? kleur 'paars) (make-bitmap-tile "afbeeldingen/alien.png"))
         (set! alien-tiles (cons (cons alienschip-adt nieuwe-tile) alien-tiles))
         ((alien-laag 'add-drawable) nieuwe-tile)
         nieuwe-tile))
