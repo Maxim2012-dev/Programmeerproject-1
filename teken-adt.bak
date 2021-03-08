@@ -31,8 +31,10 @@
     ;; voeg-alienschip-toe! : alienschip -> tile
     ; Maakt een bitmap-tile aan voor een bepaald alienschipobject
     (define (voeg-alienschip-toe! alienschip-adt)
-      (let ((nieuwe-tile
-              (make-bitmap-tile "afbeeldingen/alien.png")))
+      (let* ((kleur (alienschip-adt 'kleur))
+            (nieuwe-tile (cond ((eq? kleur 'groen) (make-bitmap-tile "afbeeldingen/alien.png"))
+                               ((eq? kleur 'blauw) (make-bitmap-tile "afbeeldingen/alien.png"))
+                               ((eq? kleur 'paars) (make-bitmap-tile "afbeeldingen/alien.png"))
         (set! alien-tiles (cons (cons alienschip-adt nieuwe-tile) alien-tiles))
         ((alien-laag 'add-drawable) nieuwe-tile)
         nieuwe-tile))
@@ -119,8 +121,11 @@
     (define (teken-kogel! kogel-adt)
       (let ((tile (neem-kogel kogel-adt)))
           (teken-object! kogel-adt tile)))
+    
 
-    (define (verwijder-kogel!  
+    (define (verwijder-kogel! kogel-adt)
+      (let ((tile (neem-kogel kogel-adt)))
+        ((kogel-laag 'remove-drawable) tile)))
 
 
     (define (teken-kogels! kogels-lijst)
@@ -144,6 +149,7 @@
       (cond ((eq? msg 'set-toets-functie!) set-toets-functie!)
             ((eq? msg 'set-spel-lus-functie!) set-spel-lus-functie!)
             ((eq? msg 'teken-spel!) teken-spel!)
+            ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
             (else (display "geen geldige boodschap"))))
 
     dispatch-teken))

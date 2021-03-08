@@ -2,9 +2,9 @@
 
 ;;;;*----------------------------------*;;;;
 ;;;;*       >>> Graphics.rkt  <<<      *;;;;
-;;;;* > Programmeerproject 2019-2020 < *;;;;
+;;;;* > Programmeerproject 2020-2021 < *;;;;
 ;;;;*                                  *;;;;
-;;;;*         >>  Versie 2  <<         *;;;;
+;;;;*         >>  Versie 3  <<         *;;;;
 ;;;;*                                  *;;;;
 ;;;;*            Adapted by:           *;;;;
 ;;;;*           Bjarno Oeyen           *;;;;
@@ -26,6 +26,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (require (only-in compatibility/mlist mlist? list->mlist mlist->list))
+;; Lijsten van R5RS zijn zogenaamde mcons-lijsten (mutable cons-cellen).
+;; Omdat deze bibliotheek in Racket is geschreven zullen binnenkomende lijsten
+;; van R5RS-programa's omgezet moeten worden naar Racket-lijsten.
 
 (require racket/gui/base)
 (require racket/string)
@@ -36,8 +39,6 @@
          make-tile-sequence
          generate-mask)
 
-
-
 ;;;; --------------------------------------------------------------------- ;;;;
 ;;;;  Note: this is NOT a reference on how to code cleanly.                ;;;;
 ;;;;        this code needs to be cleaned up since we mainly did all the   ;;;;
@@ -46,24 +47,18 @@
 ;;;; --------------------------------------------------------------------- ;;;;
 
 ;;;;############################### WINDOW #####################################
+
 ;;;;---------------------------------------------------------------------
 ;;;; make-window creates a window that accepts tiles and tile-sequences.
 ;;;; changing the x-value of a tile will update the canvas.
 ;;;;---------------------------------------------------------------------
 
-(define maximum-fps 500)
+(define default-maximum-fps 60)
 (define fps-refresh-time 1000)
 (define ignore-held-key #f)
 (define default-background-colour "black")
 
-;; The Racket GUI implementation contains a bug on Windows computers where the
-;; window width and height are incorrectly adjusted. These values are added to
-;; the window width/height when the user is using a Windows operating system.
-;; Adjust these values accordingly if the window has the incorrect size.
-(define windows-window-width-correction 16)
-(define windows-window-height-correction 39)
-
-(define (make-window w h title (target-fps 60))
+(define (make-window w h title (maximum-fps default-maximum-fps))
   (let* ((show-fps #t)
          (fps 0)
          (fps-accum-dt 0)
@@ -150,10 +145,9 @@
     (define frame
       (new closing-frame%
            [label title]
-           ; Windows does some weird stuff regarding window width/height...
-           [width (if (eq? (system-type 'os) 'windows) (+ w windows-window-width-correction) w)]
-           [height (if (eq? (system-type 'os) 'windows) (+ h windows-window-height-correction) h)]))
-    
+           [width w]
+           [height h]))
+
     ;; Create the canvas with the custom paint-callback 
     ;; This paint-callback is called each time the canvas is refreshed.
     ;; How fast the canvas is refreshed is handled later.
@@ -185,8 +179,8 @@
         ;; calculate the min delta-time given the min-wait-per-frame
         (define (calculate-interval)
           (truncate (max  
-                      (- ms-per-frame delta-time) 
-                      min-wait-per-frame)))
+                     (- ms-per-frame delta-time) 
+                     min-wait-per-frame)))
         
         ;; The heart of the self-sustaning loop.
         (define (game-loop)  
@@ -211,6 +205,17 @@
               (new timer% [notify-callback game-loop] 
                    [interval (calculate-interval) ]
                    [just-once? #t]))))
+
+    (define (adjust-size) ;; Some operating systems do not properly initialise the size of the window, compute a correction, and apply it
+      (define-values (size-w size-h) (send frame get-size))
+      (define-values (client-size-w client-size-h) (send frame get-client-size))
+      ;; (display "user-size: ") (display (list w h)) (newline)
+      ;; (display "window-size: ") (display (list size-w size-h)) (newline)
+      ;; (display "client-size: ") (display (list client-size-w client-size-h)) (newline)
+      (define correction-w (- w client-size-w))
+      (define correction-h (- h client-size-h))
+      ;; (display "correction: ") (display (list correction-w correction-h)) (newline)
+      (send frame resize (+ w correction-w) (+ h correction-h)))
     
     ;; dispatch
     (define (dispatch msg)
@@ -223,15 +228,19 @@
                                          "message"
                                          msg)))) 
     
-    ;; show the frame.
-    (send frame show #t)
-    
     ;; set background
     (set-background! default-background-colour)
     
-    ;; and finally launch the self-sustaining game-loop.
+    ;; launch the self-sustaining game-loop.
     (launch-game-loop)
+
+    ;; adjust the size of the window
+    (adjust-size)
+
+    ;; Show the window
+    (send frame show #t)
     (send canvas focus)
+    
     dispatch))
 
 ;;;;################################ BITMAP WITH ROTATED DC MATRIX #######################################
@@ -290,12 +299,15 @@
 
 ;;;;---------------------------------------------------------------------
 ;;;; generate-mask generates a mask and saves it to disk.
-;;;; String String -> void
+;;;; String, String -> void
 ;;;;---------------------------------------------------------------------
 (define (generate-mask bitmappath background-color)
   (when (string? background-color) (set! background-color (send the-color-database find-color background-color)))
   (define bitmap (get-bitmap bitmappath))
   (define dc (new bitmap-dc% [bitmap bitmap]))
+  (define white-pixel (make-object color% "white"))
+  (define black-pixel (make-object color% "black"))
+  (printf "Generating mask for ~a...~n" bitmappath)
   (for ([w (send bitmap get-width)])
     (for ([h (send bitmap get-height)])
       (define pixel (make-object color%))
@@ -303,18 +315,25 @@
       (if (and (= (send background-color red) (send pixel red))
                (= (send background-color blue) (send pixel blue))
                (= (send background-color green) (send pixel green)))
-          
-          (send dc set-pixel w h (make-object color% "white"))
-          (send dc set-pixel w h (make-object color% "black")))))
-  
-  (send (send dc get-bitmap) save-file (string-replace bitmappath ".png" "_mask.png") 'png))
+          (send dc set-pixel w h white-pixel)
+          (send dc set-pixel w h black-pixel))))
+  (define extension (path-get-extension bitmappath))
+  (when (not extension) (raise 'unknown-extension))
+  (define extension-str (bytes->string/utf-8 extension))
+  (define old-suffix extension-str)
+  (define new-suffix "_mask.png")
+  (define maskpath (string-replace bitmappath old-suffix new-suffix))
+  (printf "Saving mask to ~a...~n" bitmappath)
+  (define save-result (send (send dc get-bitmap) save-file maskpath 'png))
+  (when (not save-result) (raise 'save-failed))
+  (void))
 
 
 ;;;;################################ TILES #######################################
 ;;;;---------------------------------------------------------------------
 ;;;; make-bitmap-tile creates a tile from a bitmap with optionally a mask.
 ;;;; [] mean it is optional.
-;;;; String [String] -> Tile
+;;;; String, [String] -> Tile
 ;;;;---------------------------------------------------------------------
 (define (make-bitmap-tile bitmappath [mask #f])
   (define bitmap (get-bitmap bitmappath))
@@ -323,15 +342,16 @@
 ;;;;---------------------------------------------------------------------
 ;;;; make-tile creates a tile from a width and height with optionally
 ;;;; a bitmap and a mask. 
-;;;; Integer Integer [String] [String] -> Tile
+;;;; [] mean it is optional.
+;;;; Number, Number, [String, [String]] -> Tile
 ;;;;---------------------------------------------------------------------     
 (define (make-tile w h [bitmap #f] [mask #f])
   (when (string? bitmap) (set! bitmap (get-bitmap bitmap)))
   (when (string? mask) (set! mask (get-bitmap mask)))
-  (when (not bitmap) (set! bitmap (make-object bitmap% w h #f #t )))
+  (when (not bitmap) (set! bitmap (make-object bitmap% w h #f #t)))
   (define bufferbitmap (make-object bitmap% w h #f #t))
   (let* ((x 0) 
-         (y 0) 
+         (y 0)
          (update-callback  (lambda () #t))
          (rotated-bitmap (make-object bitmap% w h #f #t ))
          (rotated-bitmap-dc (new bitmap-dc% [bitmap rotated-bitmap]))
@@ -355,7 +375,7 @@
       (update-callback))
     
     ;; Drawing a rectangle
-    ;; Integer Integer Integer Integer (String OR Color%) -> void
+    ;; Number, Number, Number, Number, (String ∪ Color%) -> void
     (define (draw-rectangle x y w h color )
       (when (string? color) (set! color (send the-color-database find-color color)))
       (send bitmap-dc set-brush color 'solid)
@@ -364,7 +384,7 @@
       (update-callback))
     
     ;; Drawing an Ellipse
-    ;; Integer Integer Integer Integer (String OR Color%) -> void
+    ;; Number, Number, Number, Number, (String ∪ Color%) -> void
     (define (draw-ellipse x y w h color)
       (when (string? color) (set! color (send the-color-database find-color color)))
       (send bitmap-dc set-brush color 'solid)
@@ -373,15 +393,15 @@
       (update-callback))
     
     ;; Drawing a Line
-    ;; Integer Integer Integer Integer Integer (String OR Color%) -> void
-    (define (draw-line x y w h width color )
+    ;; Number, Number, Number, Number, Number, (String ∪ Color%) -> void
+    (define (draw-line x y w h width color)
       (when (string? color) (set! color (send the-color-database find-color color)))
       (send bitmap-dc set-pen color width 'solid)
       (send bitmap-dc draw-line x y w h)
       (update-callback))
     
     ;; Drawing Text
-    ;; String Integer Integer Integer (String OR Color%) -> void
+    ;; String, Number, Number, Number, (String ∪ Color%) -> void
     (define (draw-text text fontsize x y color)
       (when (string? color) (set! color (send the-color-database find-color color)))
       (send bitmap-dc set-font (make-object font% fontsize 'default))
@@ -422,20 +442,21 @@
     ;; Set the X position on the screen
     ;; Integer -> void
     (define (set-x! new_x)
-      (set! x new_x)
-      (update-callback))
+      (unless (= x new_x)
+        (set! x new_x)
+        (update-callback)))
     
     ;; Set the Y position on the screen
     ;; Integer -> void
     (define (set-y! new_y)
-      (set! y new_y)
-      (update-callback))
+      (unless (= y new_y)
+        (set! y new_y)
+        (update-callback)))
     
     (define transparent-color (make-object color% 0 0 0 0))
     
     ;; Drawing procedure called by the layer 
-    ;; on which the tile is drawn. Not to be used
-    ;; by students manually!
+    ;; on which the tile is drawn. This should not be called in a student project!
     ;; dc% -> void
     (define (draw dc)    
       (send rotated-bitmap-dc draw-bitmap bufferbitmap 0 0)
@@ -448,7 +469,7 @@
     ;; will notify the parent (layers) that the tile
     ;; has changed and allows us to automatically
     ;; redraw the tiles.
-    ;; lambda() -> void
+    ;; (void -> void) -> void
     (define (set-on-update! new_callback)
       (set! update-callback new_callback))
     
@@ -490,9 +511,7 @@
 ;;;;---------------------------------------------------------------------  
 (define (make-tile-sequence tiles-in)
   ;; Initialize the current index and its callback.
-  (let ((tiles (if (mlist? tiles-in)
-                   (mlist->list tiles-in)
-                   tiles-in))
+  (let ((tiles (if (mlist? tiles-in) (mlist->list tiles-in) tiles-in))
         (index 0)
         (update-callback (lambda () #t)))
     
@@ -501,6 +520,7 @@
     (define (set-x! new_x)
       (for-each (lambda (tile) ((tile 'set-x!) new_x)) tiles)
       (update-callback))
+
     ;; Integer -> void
     (define (set-y! new_y)
       (for-each (lambda (tile) ((tile 'set-y!) new_y)) tiles)
@@ -542,23 +562,23 @@
       (for-each (lambda (tile) (tile 'rotate-counterclockwise) ) tiles)
       (update-callback))
     
-    ;; Integer Integer Integer Integer String -> void
+    ;; Number, Number, Number, Number, String -> void
     (define (draw-rectangle x y w h color)
       (for-each (lambda (tile) ((tile 'draw-rectangle) x y w h color )) tiles)
       (update-callback))
     
-    ;; Integer Integer Integer Integer String -> void
+    ;; Number, Number, Number, Number, String -> void
     (define (draw-ellipse x y w h color)
       (for-each (lambda (tile) ((tile 'draw-ellipse) x y w h color )) tiles)
       (update-callback))
     
-    ;; String Integer Integer Integer String -> void
+    ;; String, Number, Number, Number, String -> void
     (define (draw-text text fontsize x y color)
       (for-each (lambda (tile) ((tile 'draw-text) text fontsize x y color )) tiles)
       (update-callback))
     
-    ;; Integer Integer Integer Integer Integer String -> void
-    (define (draw-line x y w h width color )
+    ;; Number, Number, Number, Number, Number, String -> void
+    (define (draw-line x y w h width color)
       (for-each (lambda (tile) ((tile 'draw-line)x y w h width color  )) tiles)
       (update-callback))
     
@@ -576,7 +596,7 @@
       (((current) 'draw) dc))
     
     ;; set update callback which is called every-time a sequence changes
-    ;; lambda() -> void
+    ;; (void -> void) -> void
     (define (set-on-update! new_callback)
       (set! update-callback new_callback))
     
@@ -630,9 +650,9 @@
 ;;;;---------------------------------------------------------------------  
 (define (make-layer w h canvas)
   
-  (let* ((drawables '())                             ;; all drawables on this layer.
+  (let* ((drawables '())                              ;; all drawables on this layer.
          (bitmap (make-object bitmap% w h #f #t ))    ;; buffer-bitmap for fast drawing
-         (bitmap-dc (new bitmap-dc% [bitmap bitmap])) ; dc of bitmap (drawing context)
+         (bitmap-dc (new bitmap-dc% [bitmap bitmap])) ;; dc of bitmap (drawing context)
          (needs-update #t))                           ;; even faster drawing thanks to dirty bit.
     
     ;; redraw on temporary bitmap layer.
@@ -653,10 +673,9 @@
         (set! needs-update #f))
       (send dc draw-bitmap bitmap 0 0))
     
-    ;; # methods
     ;; Adds a drawable to the layer which is a tile a tile-sequence or 
     ;; a drawable created by the student which suports 'draw' and 'set-on-update!'
-    ;; Drawable (Tile or Tile-Sequence) -> void
+    ;; (Tile ∪ Tile-Sequence) -> void
     (define (add-drawable drawable)
       ((drawable 'set-on-update!) (lambda () (set! needs-update #t)))
       (set! drawables (cons drawable drawables))
@@ -664,16 +683,22 @@
     
     ;; Remove a drawable to the layer which is a tile a tile-sequence or 
     ;; a drawable created by the student which suports 'draw' and 'set-on-update!'
-    ;; Drawable (Tile or Tile-Sequence) -> void
+    ;; (Tile ∪ Tile-Sequence) -> void
     (define (remove-drawable drawable)
       ((drawable 'set-on-update!) (lambda () #t))
       (set! drawables (remq drawable drawables))
       (set! needs-update #t))
+
+    ;; Removes all drawables from a single layer.
+    ;; void -> void
+    (define (empty)
+      (for-each remove-drawable drawables))
     
     ;; # dispatch
     (define (dispatch msg)
       (cond ((eq? msg 'add-drawable)  add-drawable)
             ((eq? msg 'remove-drawable) remove-drawable)
+            ((eq? msg 'empty) (empty))
             ((eq? msg 'draw) draw)
             (else (raise-arguments-error 'layer
                                          "wrong message sent"

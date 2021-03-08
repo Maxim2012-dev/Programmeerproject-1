@@ -34,7 +34,7 @@
       (let* ((kleur (alienschip-adt 'kleur))
             (nieuwe-tile (cond ((eq? kleur 'groen) (make-bitmap-tile "afbeeldingen/alien.png"))
                                ((eq? kleur 'blauw) (make-bitmap-tile "afbeeldingen/alien.png"))
-                               ((eq? kleur 'paars) (make-bitmap-tile "afbeeldingen/alien.png"))
+                               ((eq? kleur 'paars) (make-bitmap-tile "afbeeldingen/alien.png")))))
         (set! alien-tiles (cons (cons alienschip-adt nieuwe-tile) alien-tiles))
         ((alien-laag 'add-drawable) nieuwe-tile)
         nieuwe-tile))

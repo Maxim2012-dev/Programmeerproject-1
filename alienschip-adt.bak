@@ -27,5 +27,6 @@
            ((eq? msg 'positie) positie)
            ((eq? msg 'schiet) schiet!)
            ((eq? msg 'rand-geraakt?) rand-geraakt?)
+           ((eq? msg 'kleur) kleur)
            (else (display "ongeldige boodschap - alienschip"))))
     dispatch-alienschip)

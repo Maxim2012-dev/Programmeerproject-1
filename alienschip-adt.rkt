@@ -29,4 +29,4 @@
            ((eq? msg 'rand-geraakt?) rand-geraakt?)
            ((eq? msg 'kleur) kleur)
            (else (display "ongeldige boodschap - alienschip"))))
-    dispatch-alienschip)
+    dispatch-alienschip))

@@ -24,9 +24,10 @@
               ((inner-idx 0)
                (inner-vector (vector-ref schepen outer-idx)))
               ; inner-idx + 1 (vermijden dat x op nul start)
-              (vector-set! inner-vector inner-idx (maak-alienschip (maak-positie
-                                                                    (afstand-tussen-kolommen (+ inner-idx 1))
-                                                                    (afstand-tussen-rijen outer-idx))))
+              (define nieuw_alienschip (maak-alienschip (maak-positie
+                                                         (afstand-tussen-kolommen (+ inner-idx 1))
+                                                         (afstand-tussen-rijen outer-idx))))
+              (vector-set! inner-vector inner-idx nieuw_alienschip)
               (if (< (+ inner-idx 1) aantal-aliens-per-rij)
                   (inner-loop (+ inner-idx 1) inner-vector)
                   (outer-loop (+ outer-idx 1)))))))
