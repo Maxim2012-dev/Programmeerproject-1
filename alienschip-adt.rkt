@@ -4,13 +4,14 @@
 
 
 (define (maak-alienschip positie)
-  (let ((type 'alienschip)
+  (let ((status 'actief)
         (kleur #f))
 
     ; de beweeg! functie die de beweeg van positie gaat aanroepen
-    ; om zo de raket naar links of rechts te laten bewegen afhankelijk van het richtingsargument
+    ; om zo het alienschip naar een bepaalde richting te laten bewegen afhankelijk van het richtingsargument
     (define (beweeg! richting)
-      ((positie 'beweeg!) richting))
+      (if (eq? status 'actief)
+          ((positie 'beweeg!) richting)))
 
 
     ; rand-geraakt? : / -> /
@@ -21,6 +22,15 @@
     (define (schiet!)
       (maak-kogel positie))
 
+    ; kleur! gaat de kleur/soort van de huidige alien aanpassen naar een nieuwe kleur
+    (define (kleur! nieuwe_kleur)
+      (set! kleur nieuwe_kleur))
+
+    ; zet de status van de huidige alien op inactief
+    (define (zet-inactief!)
+      (set! status 'inactief))
+      
+
     ; de dispatch functie
     (define (dispatch-alienschip msg)
       (cond((eq? msg 'beweeg) beweeg!)
@@ -28,5 +38,8 @@
            ((eq? msg 'schiet) schiet!)
            ((eq? msg 'rand-geraakt?) rand-geraakt?)
            ((eq? msg 'kleur) kleur)
+           ((eq? msg 'kleur!) kleur!)
+           ((eq? msg 'status) status)
+           ((eq? msg 'zet-inactief!) zet-inactief!)
            (else (display "ongeldige boodschap - alienschip"))))
     dispatch-alienschip))

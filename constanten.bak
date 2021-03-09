@@ -11,6 +11,6 @@
 (define aantal-aliens-per-rij 11)
 
 (define snelheid-vloot 1000)
-(define snelheid-kogel 50)
+(define snelheid-kogel 100)
 
 (define y-buiten-speelveld 25)

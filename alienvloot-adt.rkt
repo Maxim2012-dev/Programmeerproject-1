@@ -27,12 +27,19 @@
               (define nieuw_alienschip (maak-alienschip (maak-positie
                                                          (afstand-tussen-kolommen (+ inner-idx 1))
                                                          (afstand-tussen-rijen outer-idx))))
+              ; kleur toewijzen aan het nieuw alienschip
+              (cond ((= outer-idx 0) ((nieuw_alienschip 'kleur!) 'paars))
+                    ((= outer-idx 1) ((nieuw_alienschip 'kleur!) 'blauw))
+                    ((= outer-idx 2) ((nieuw_alienschip 'kleur!) 'geel))
+                    (else ((nieuw_alienschip 'kleur!) 'blauw)))
               (vector-set! inner-vector inner-idx nieuw_alienschip)
               (if (< (+ inner-idx 1) aantal-aliens-per-rij)
                   (inner-loop (+ inner-idx 1) inner-vector)
                   (outer-loop (+ outer-idx 1)))))))
     
+    
     (vul-vloot)
+    
 
     ; Een for-each om op elk alienschip een functie los te laten
     (define (voor-alle-schepen fun)
@@ -46,11 +53,17 @@
               (if (< (+ inner-idx 1) aantal-aliens-per-rij)
                   (inner-loop (+ inner-idx 1) inner-vector)
                   (outer-loop (+ outer-idx 1)))))))
+    
 
 
+    ; verwijder-schip! : alienschip-adt -> /
+    ; gaat op zoek naar het alienschip dat 'verwijderd' moet worden en zet zijn y-positie dan buiten
+    ; het speelveld en verandert de status naar inactief. (je kan immers niet echt een element verwijderen uit een vector)
     (define (verwijder-schip! alienschip-adt)
       (voor-alle-schepen (lambda (alien) (if (eq? alien alienschip-adt)
-                                             (((alien 'positie) 'y!) y-buiten-speelveld)))))
+                                             (begin
+                                               (((alien 'positie) 'y!) y-buiten-speelveld)
+                                               ((alien 'zet-inactief!)))))))
     
 
     ; switch! : / -> /

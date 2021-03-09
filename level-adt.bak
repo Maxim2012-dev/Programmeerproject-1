@@ -64,13 +64,13 @@
               (let ((kogel (car kogels-lijst)))
                 ((alienvloot-adt 'voor-alle-schepen) (lambda (alien) (if (((alien 'positie) 'gelijk?)
                                                                           (kogel 'positie))
-                                                                         (begin (verwijder-van-scherm alien kogel)
+                                                                         (begin (verwijder-uit-lijst alien kogel)
                                                                                 ((teken-adt 'verwijder-kogel!) kogel)))))
                 (iter (cdr kogels-lijst) aliens-lijst))))
         (iter kogels-lijst aliens-lijst)))
 
 
-    (define (verwijder-van-scherm alienschip-adt kogel-adt)
+    (define (verwijder-uit-lijst alienschip-adt kogel-adt)
       ((kogels-adt 'verwijder-kogel!) kogel-adt)
       ((alienvloot-adt 'verwijder-schip!) alienschip-adt))
     
