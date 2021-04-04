@@ -63,31 +63,21 @@
           (if (not (null? kogels-lijst))
               (let ((kogel (car kogels-lijst)))
                 ; positie-kogel = positie-alien + levens-alien = 1? -> verwijder het schip
-                ; positie-kogel = positie-alien + levens-alien not 1 -> trek 1 leven af van alien
+                ; positie-kogel = positie-alien + levens-alien not 1 -> trek leven af van alien
                 ((alienvloot-adt 'voor-alle-schepen)
-                 (lambda (alien) (cond ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
-                                             (= (alien 'levens) 1))
-                                        (begin (verwijder-alienschip! alien)
-                                               (verwijder-kogel! kogel)
-                                               ((teken-adt 'verwijder-kogel!) kogel)))
-                                       ((((alien 'positie) 'gelijk?) (kogel 'positie))
-                                        ((alien 'levens!) (- (alien 'levens) 1))
-                                        (verwijder-kogel! kogel)
-                                        ((teken-adt 'verwijder-kogel!) kogel)))))
+                 (lambda (alien) (cond ((and (((alien 'positie) 'gelijk?)
+                                             (kogel 'positie))
+                                             
+                                     (begin (verwijder-van-scherm alien kogel)
+                                            ((teken-adt 'verwijder-kogel!) kogel)))))
                 (iter (cdr kogels-lijst) aliens-lijst))))
         (iter kogels-lijst aliens-lijst)))
-    
 
 
-    ; individueel alienschip verwijderen van scherm
-    (define (verwijder-alienschip! alienschip-adt)
+    (define (verwijder-van-scherm alienschip-adt kogel-adt)
+      ((kogels-adt 'verwijder-kogel!) kogel-adt)
       ((alienvloot-adt 'verwijder-schip!) alienschip-adt))
     
-
-    ; individuele kogel verwijderen van scherm
-    (define (verwijder-kogel! kogel-adt)
-      ((kogels-adt 'verwijder-kogel!) kogel-adt))
-
     
 
     ;; update! : number -> /
