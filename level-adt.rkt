@@ -3,6 +3,7 @@
 ;;          -----------
 
 (load "alienvloot-adt.rkt")
+(#%require (only random))
 
 (define (maak-level aantal-cellen-breedte aantal-cellen-hoogte)
   (let* ((raket-start-positie
@@ -11,7 +12,8 @@
          (alienvloot-adt (maak-alienvloot))
          (kogels-adt (maak-kogels-adt))
          (vloot-tijd 0)
-         (kogel-tijd 0))
+         (kogel-tijd 0)
+         (alien-schiettijd 0))
 
     ;; beweeg-raket! : symbol -> /
     (define (beweeg-raket! toets)
@@ -29,12 +31,18 @@
             (set! vloot-tijd 0))))
     
 
-    ;; vuur-kogel-af! : symbol -> /
-    (define (vuur-kogel-af! toets)
+    ;; schiet-raketkogel! : symbol -> /
+    (define (schiet-raketkogel! toets)
       (if (eq? toets '#\space)
-          ((kogels-adt 'voeg-kogel-toe!) (maak-kogel (maak-positie
-                                                      ((raket-adt 'positie) 'x)
-                                                      ((raket-adt 'positie) 'y))))))
+          (let ((nieuwe_kogel (maak-kogel (maak-positie ((raket-adt 'positie) 'x)
+                                                        ((raket-adt 'positie) 'y))
+                                          'raket)))
+            ((kogels-adt 'voeg-kogel-toe!) nieuwe_kogel))))
+
+    
+    ;; schiet-alienkogel! : / -> /
+    ;(define (schiet-alienkogel!)
+      
 
 
     ;; beweeg-kogel! : / -> /
@@ -96,13 +104,15 @@
       (beweeg-vloot!)
       (set! kogel-tijd (+ kogel-tijd tijdsverschil))
       (beweeg-kogels!)
+      (set! alien-schiettijd (+ alien-schiettijd tijdsverschil))
+      (schiet-alienkogel!)
       (check-geraakt kogels-adt alienvloot-adt teken-adt))
     
     
     ;; toets! : any -> /
     (define (toets! toets)
       (beweeg-raket! toets)
-      (vuur-kogel-af! toets))
+      (schiet-raketkogel! toets))
     
     
     ; Dispatch

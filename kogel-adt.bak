@@ -2,8 +2,8 @@
 ;; ----------  Kogel ADT  ----------
 ;;            -----------
 
-(define (maak-kogel positie type-kogel)
-  (let ((type type-kogel))
+(define (maak-kogel positie)
+  (let ((type 'kogel))
 
     ;; beweeg! : / -> /
     (define (beweeg!)
