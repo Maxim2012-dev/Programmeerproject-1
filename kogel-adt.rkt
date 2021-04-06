@@ -7,7 +7,6 @@
 
     ;; beweeg! : symbol -> /
     (define (beweeg! type)
-      (display "a")
       (cond ((eq? type 'raket)
              ((positie 'beweeg!) 'omhoog))
             ((eq? type 'alien)
@@ -15,7 +14,6 @@
 
     ;; stop! : / > /
     (define (stop)
-      (display "stop")
       ((positie 'beweeg!) 'stop))
     
     ;; dispatch functie

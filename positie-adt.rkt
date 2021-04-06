@@ -31,7 +31,7 @@
 
   ; Checken of de y-coördinaten niet buiten het speelveld treden
   (define (rand-verticaal?)
-    (or (< y 0) (= y (- spel-hoogte 1))))
+    (or (< y 0) (> y (- spel-hoogte 1))))
 
   ; Procedure die een positieverandering gaat doen door
   ; een aanpassing aan de x- of y-coördinaat afhankelijk van de meegegeven richting

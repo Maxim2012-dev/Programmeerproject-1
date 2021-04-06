@@ -68,7 +68,7 @@
     ;; roep-beweeg-op : kogel-adt -> /
     (define (roep-beweeg-op kogel-adt)
       (let* ((y ((kogel-adt 'positie) 'y))
-             (raakt-rand? ((kogel-adt 'positie) 'rand-verticaal?))
+             (raakt-rand? (((kogel-adt 'positie) 'rand-verticaal?)))
              (type-kogel (kogel-adt 'type)))
         (if (not raakt-rand?)
             ((kogel-adt 'beweeg!) type-kogel)
