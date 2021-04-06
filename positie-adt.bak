@@ -30,8 +30,6 @@
     (or (= x 0) (= x (- spel-breedte 1))))
 
   ; Checken of de y-coördinaten niet buiten het speelveld treden
-  (define (rand-verticaal?)
-    (or (< y 0) (= y (- spel-hoogte 1))))
 
   ; Procedure die een positieverandering gaat doen door
   ; een aanpassing aan de x- of y-coördinaat afhankelijk van de meegegeven richting
@@ -56,9 +54,7 @@
       ((eq? msg 'y!) y!)
       ((eq? msg 'gelijk?) gelijk?)
       ((eq? msg 'beweeg!) beweeg!)
-      ((eq? msg 'rand-horizontaal?) rand-horizontaal?)
-      ((eq? msg 'rand-verticaal?) rand-verticaal?)
-      (else (display "ongeldige boodschap - positie"))))
+      ((eq? msg 'rand?) rand?)))
   dispatch-positie)
       
 

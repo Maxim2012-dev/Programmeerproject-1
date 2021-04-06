@@ -5,12 +5,17 @@
 (define (maak-kogel positie type-kogel)
   (let ((type type-kogel))
 
-    ;; beweeg! : / -> /
-    (define (beweeg!)
-      ((positie 'beweeg!) 'omhoog))
+    ;; beweeg! : symbol -> /
+    (define (beweeg! type)
+      (display "a")
+      (cond ((eq? type 'raket)
+             ((positie 'beweeg!) 'omhoog))
+            ((eq? type 'alien)
+             ((positie 'beweeg!) 'omlaag))))
 
     ;; stop! : / > /
     (define (stop)
+      (display "stop")
       ((positie 'beweeg!) 'stop))
     
     ;; dispatch functie

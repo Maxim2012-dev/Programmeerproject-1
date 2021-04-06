@@ -14,3 +14,5 @@
 (define snelheid-kogel 50)
 
 (define y-buiten-speelveld 25)
+
+(define delay-alienschot 3000)

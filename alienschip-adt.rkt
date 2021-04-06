@@ -17,7 +17,7 @@
 
     ; rand-geraakt? : / -> /
     (define (rand-geraakt?)
-      ((positie 'rand?)))
+      ((positie 'rand-horizontaal?)))
 
     ; schiet! operatie gaat een nieuwe kogel aanmaken op de positie van het alienschip
     (define (schiet!)

@@ -6,7 +6,7 @@
 (define (maak-alienschip positie)
   (let ((status 'actief)
         (kleur #f)
-        (levens #f)))
+        (levens #f))
 
     ; de beweeg! functie die de beweeg van positie gaat aanroepen
     ; om zo het alienschip naar een bepaalde richting te laten bewegen afhankelijk van het richtingsargument
@@ -27,6 +27,10 @@
     (define (kleur! nieuwe_kleur)
       (set! kleur nieuwe_kleur))
 
+    ; levens! gaat het aantal levens van de huidige alien instellen
+    (define (levens! aantal_levens)
+      (set! levens aantal_levens))
+
     ; zet de status van de huidige alien op inactief
     (define (zet-inactief!)
       (set! status 'inactief))
@@ -40,6 +44,8 @@
            ((eq? msg 'rand-geraakt?) rand-geraakt?)
            ((eq? msg 'kleur) kleur)
            ((eq? msg 'kleur!) kleur!)
+           ((eq? msg 'levens) levens)
+           ((eq? msg 'levens!) levens!)
            ((eq? msg 'status) status)
            ((eq? msg 'zet-inactief!) zet-inactief!)
            (else (display "ongeldige boodschap - alienschip"))))

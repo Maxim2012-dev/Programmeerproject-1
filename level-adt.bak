@@ -3,6 +3,7 @@
 ;;          -----------
 
 (load "alienvloot-adt.rkt")
+(#%require (only random))
 
 (define (maak-level aantal-cellen-breedte aantal-cellen-hoogte)
   (let* ((raket-start-positie
@@ -11,7 +12,8 @@
          (alienvloot-adt (maak-alienvloot))
          (kogels-adt (maak-kogels-adt))
          (vloot-tijd 0)
-         (kogel-tijd 0))
+         (kogel-tijd 0)
+         (alien-schiettijd 0))
 
     ;; beweeg-raket! : symbol -> /
     (define (beweeg-raket! toets)
@@ -29,12 +31,18 @@
             (set! vloot-tijd 0))))
     
 
-    ;; vuur-kogel-af! : symbol -> /
-    (define (vuur-kogel-af! toets)
+    ;; schiet-raketkogel! : symbol -> /
+    (define (schiet-raketkogel! toets)
       (if (eq? toets '#\space)
-          ((kogels-adt 'voeg-kogel-toe!) (maak-kogel (maak-positie
-                                                      ((raket-adt 'positie) 'x)
-                                                      ((raket-adt 'positie) 'y))))))
+          (let ((nieuwe_kogel (maak-kogel (maak-positie ((raket-adt 'positie) 'x)
+                                                        ((raket-adt 'positie) 'y))
+                                          'raket)))
+            ((kogels-adt 'voeg-kogel-toe!) nieuwe_kogel))))
+
+    
+    ;; schiet-alienkogel! : / -> /
+    ;(define (schiet-alienkogel!)
+      
 
 
     ;; beweeg-kogel! : / -> /
@@ -63,21 +71,31 @@
           (if (not (null? kogels-lijst))
               (let ((kogel (car kogels-lijst)))
                 ; positie-kogel = positie-alien + levens-alien = 1? -> verwijder het schip
-                ; positie-kogel = positie-alien + levens-alien not 1 -> trek leven af van alien
+                ; positie-kogel = positie-alien + levens-alien not 1 -> trek 1 leven af van alien
                 ((alienvloot-adt 'voor-alle-schepen)
-                 (lambda (alien) (cond ((and (((alien 'positie) 'gelijk?)
-                                             (kogel 'positie))
-                                             
-                                     (begin (verwijder-van-scherm alien kogel)
-                                            ((teken-adt 'verwijder-kogel!) kogel)))))
+                 (lambda (alien) (cond ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
+                                             (= (alien 'levens) 1))
+                                        (begin (verwijder-alienschip! alien)
+                                               (verwijder-kogel! kogel)
+                                               ((teken-adt 'verwijder-kogel!) kogel)))
+                                       ((((alien 'positie) 'gelijk?) (kogel 'positie))
+                                        ((alien 'levens!) (- (alien 'levens) 1))
+                                        (verwijder-kogel! kogel)
+                                        ((teken-adt 'verwijder-kogel!) kogel)))))
                 (iter (cdr kogels-lijst) aliens-lijst))))
         (iter kogels-lijst aliens-lijst)))
+    
 
 
-    (define (verwijder-van-scherm alienschip-adt kogel-adt)
-      ((kogels-adt 'verwijder-kogel!) kogel-adt)
+    ; individueel alienschip verwijderen van scherm
+    (define (verwijder-alienschip! alienschip-adt)
       ((alienvloot-adt 'verwijder-schip!) alienschip-adt))
     
+
+    ; individuele kogel verwijderen van scherm
+    (define (verwijder-kogel! kogel-adt)
+      ((kogels-adt 'verwijder-kogel!) kogel-adt))
+
     
 
     ;; update! : number -> /
@@ -86,13 +104,15 @@
       (beweeg-vloot!)
       (set! kogel-tijd (+ kogel-tijd tijdsverschil))
       (beweeg-kogels!)
+      (set! alien-schiettijd (+ alien-schiettijd tijdsverschil))
+      (schiet-alienkogel!)
       (check-geraakt kogels-adt alienvloot-adt teken-adt))
     
     
     ;; toets! : any -> /
     (define (toets! toets)
       (beweeg-raket! toets)
-      (vuur-kogel-af! toets))
+      (schiet-raketkogel! toets))
     
     
     ; Dispatch

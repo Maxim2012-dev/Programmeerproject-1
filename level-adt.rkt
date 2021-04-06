@@ -3,7 +3,7 @@
 ;;          -----------
 
 (load "alienvloot-adt.rkt")
-(#%require (only random))
+(#%require srfi/27)
 
 (define (maak-level aantal-cellen-breedte aantal-cellen-hoogte)
   (let* ((raket-start-positie
@@ -41,8 +41,18 @@
 
     
     ;; schiet-alienkogel! : / -> /
-    ;(define (schiet-alienkogel!)
-      
+    (define (schiet-alienkogel!)
+      (if (>= alien-schiettijd delay-alienschot)
+          ; willekeurige alien uit het vloot kiezen
+          (let* ((alien-matrix (alienvloot-adt 'schepen))
+                 (inner-vector (vector-ref alien-matrix (random-integer aantal-rijen-aliens)))
+                 (schietende-alien (vector-ref inner-vector (random-integer aantal-aliens-per-rij)))
+                 (nieuwe_kogel (maak-kogel (maak-positie ((schietende-alien 'positie) 'x)
+                                                         ((schietende-alien 'positie) 'y))
+                                           'alien)))
+            ((kogels-adt 'voeg-kogel-toe!) nieuwe_kogel)
+            (set! alien-schiettijd 0))))
+            
 
 
     ;; beweeg-kogel! : / -> /
@@ -55,12 +65,15 @@
               (set! kogel-tijd 0)))))
     
 
+    ;; roep-beweeg-op : kogel-adt -> /
     (define (roep-beweeg-op kogel-adt)
       (let* ((y ((kogel-adt 'positie) 'y))
-             (raakt-rand? (< y 0)))
+             (raakt-rand? ((kogel-adt 'positie) 'rand-verticaal?))
+             (type-kogel (kogel-adt 'type)))
         (if (not raakt-rand?)
-            ((kogel-adt 'beweeg!))
+            ((kogel-adt 'beweeg!) type-kogel)
             ((kogel-adt 'stop)))))
+    
 
 
     (define (check-geraakt kogels-adt alienvloot-adt teken-adt)
@@ -70,22 +83,26 @@
         (define (iter kogels-lijst aliens-lijst)
           (if (not (null? kogels-lijst))
               (let ((kogel (car kogels-lijst)))
-                ; positie-kogel = positie-alien + levens-alien = 1? -> verwijder het schip
-                ; positie-kogel = positie-alien + levens-alien not 1 -> trek 1 leven af van alien
+                ; voor alle aliens checken of één van de afgevuurde kogels raakt
                 ((alienvloot-adt 'voor-alle-schepen)
-                 (lambda (alien) (cond ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
-                                             (= (alien 'levens) 1))
-                                        (begin (verwijder-alienschip! alien)
-                                               (verwijder-kogel! kogel)
-                                               ((teken-adt 'verwijder-kogel!) kogel)))
-                                       ((((alien 'positie) 'gelijk?) (kogel 'positie))
-                                        ((alien 'levens!) (- (alien 'levens) 1))
-                                        (verwijder-kogel! kogel)
-                                        ((teken-adt 'verwijder-kogel!) kogel)))))
+                 (lambda (alien)
+                         ; kogel van raket raakt een alien + alien heeft 1 leven
+                   (cond ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
+                               (eq? (kogel 'type) 'raket)
+                               (= (alien 'levens) 1))
+                          (verwijder-alienschip! alien)
+                          (verwijder-kogel! kogel)
+                          ((teken-adt 'verwijder-kogel!) kogel))
+                         ; kogel van raket raakt een alien + alien heeft meer dan 1 leven
+                         ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
+                               (eq? (kogel 'type) 'raket))
+                          ((alien 'levens!) (- (alien 'levens) 1))
+                          (verwijder-kogel! kogel)
+                          ((teken-adt 'verwijder-kogel!) kogel)))))
                 (iter (cdr kogels-lijst) aliens-lijst))))
         (iter kogels-lijst aliens-lijst)))
-    
 
+    
 
     ; individueel alienschip verwijderen van scherm
     (define (verwijder-alienschip! alienschip-adt)
