@@ -7,14 +7,18 @@
 
 (define (maak-level aantal-cellen-breedte aantal-cellen-hoogte)
   (let* ((raket-start-positie
-          (maak-positie raket-start-x (- aantal-cellen-hoogte 8)))
+          (maak-positie raket-start-x raket-start-y))
          (raket (maak-raket raket-start-positie))
          (alienvloot (maak-alienvloot))
          (kogels (maak-kogels-adt))
+         (score (maak-score))
+         (alien-schiettijd 0)
          (vloot-tijd 0)
-         (kogel-tijd 0)
-         (alien-schiettijd 0))
+         (kogel-tijd 0))
 
+
+    ;; --------------- BEWEEG - OPERATIES ---------------
+    
     ;; beweeg-raket! : symbol -> /
     (define (beweeg-raket! toets)
       (cond ((eq? toets 'left)
@@ -29,6 +33,30 @@
           (begin
             ((alienvloot 'beweeg))
             (set! vloot-tijd 0))))
+
+
+     ;; beweeg-kogel! : / -> /
+    (define (beweeg-kogels!)
+      (if (and (not (null? (kogels 'kogels-lijst)))
+               (>= kogel-tijd snelheid-kogel))
+          (let ((lijst-kogels (kogels 'kogels-lijst)))
+            (begin
+              ((kogels 'voor-alle-kogels) roep-beweeg-op)
+              (set! kogel-tijd 0)))))
+
+
+     ;; roep-beweeg-op : kogel-adt -> /
+    (define (roep-beweeg-op kogel-adt)
+      (let* ((y ((kogel-adt 'positie) 'y))
+             (raakt-rand? (((kogel-adt 'positie) 'rand-verticaal?)))
+             (type-kogel (kogel-adt 'type)))
+        (if (not raakt-rand?)
+            ((kogel-adt 'beweeg!) type-kogel)
+            ((kogels 'verwijder-kogel!) kogel-adt))))
+    
+
+
+    ;; --------------- SCHIET - OPERATIES ---------------
     
 
     ;; schiet-raketkogel! : symbol -> /
@@ -52,27 +80,7 @@
                                            'alien)))
             ((kogels 'voeg-kogel-toe!) nieuwe_kogel)
             (set! alien-schiettijd 0))))
-            
-
-
-    ;; beweeg-kogel! : / -> /
-    (define (beweeg-kogels!)
-      (if (and (not (null? (kogels 'kogels-lijst)))
-               (>= kogel-tijd snelheid-kogel))
-          (let ((lijst-kogels (kogels 'kogels-lijst)))
-            (begin
-              ((kogels 'voor-alle-kogels) roep-beweeg-op)
-              (set! kogel-tijd 0)))))
     
-
-    ;; roep-beweeg-op : kogel-adt -> /
-    (define (roep-beweeg-op kogel-adt)
-      (let* ((y ((kogel-adt 'positie) 'y))
-             (raakt-rand? (((kogel-adt 'positie) 'rand-verticaal?)))
-             (type-kogel (kogel-adt 'type)))
-        (if (not raakt-rand?)
-            ((kogel-adt 'beweeg!) type-kogel)
-            ((kogels 'verwijder-kogel!) kogel-adt)))) 
     
 
     ;; Dit is de procedure die constant checkt of één van de kogels
@@ -111,7 +119,6 @@
                            (display "raket dood"))
                           ; kogel van ALIEN raakt de raket + raket heeft meer dan 1 leven
                           ((((raket 'positie) 'gelijk?) (kogel 'positie))
-                           (display (raket 'levens)) (newline)
                            ((raket 'verminder-levens!))
                            ((kogels 'verwijder-kogel!) kogel)
                            ((teken-adt 'verwijder-kogel!) kogel)
@@ -119,6 +126,17 @@
                 (iter (cdr kogels-lijst)))))
         (iter kogels-lijst)))
 
+
+    ;; --------------- SCORE - OPERATIES ---------------
+
+
+    (define (check-score)
+      (let ((huidige-score (score 'huidige-score))
+            (hoogste-score (score 'hoogste-score)))
+        
+
+
+    ;; --------------- VERWIJDER - FUNCTIES ---------------
     
 
     ; individueel alienschip verwijderen van scherm
@@ -130,6 +148,8 @@
     (define (verwijder-kogel! kogel-adt)
       ((kogels 'verwijder-kogel!) kogel-adt))
 
+
+    ;; --------------- CALLBACKS ---------------
     
 
     ;; update! : number -> /
@@ -140,7 +160,7 @@
       (beweeg-kogels!)
       (set! alien-schiettijd (+ alien-schiettijd tijdsverschil))
       (schiet-alienkogel!)
-      (check-geraakt teken-adt))
+      (check-geraakt teken-adt)
     
     
     ;; toets! : any -> /

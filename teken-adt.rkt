@@ -14,22 +14,28 @@
 
     ;; --------------- LAGEN EN TILES ---------------
 
-    ; Raketlaag en tile aanmaken
+    ; Raketlaag en tile 
     (define raket-laag (scherm 'make-layer))
     (define raket-tile
       (make-bitmap-tile "afbeeldingen/raket.png"))
     ((raket-laag 'add-drawable) raket-tile)
 
-    ; Alienlaag aanmaken
+    ; Alienlaag 
     (define alien-laag (scherm 'make-layer))
     (define alien-tiles '())
 
-    ; Kogellaag en tile aanmaken
+    ; Kogellaag en tiles-lijst
     (define kogel-laag (scherm 'make-layer))
     (define kogel-tiles '())
 
-    ; Scorelaag aanmaken
+    ; Scorelaag en tile
     (define score-laag (scherm 'make-layer))
+    (define score-tile (make-tile 70 60))
+    ((score-tile 'draw-rectangle) 10 10 65 55 "red")
+    ((score-tile 'draw-text) "000" 25 15 15 "white")
+    ((score-laag 'add-drawable) score-tile)
+    ((score-tile 'set-x) score-text-x)
+    ((score-tile 'set-y) score-text-y)
 
 
     ;; --------------- TILES GENEREREN ---------------

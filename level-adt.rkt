@@ -130,9 +130,9 @@
     ;; --------------- SCORE - OPERATIES ---------------
 
 
-    (define (check-score)
-      (let ((huidige-score (score 'huidige-score))
-            (hoogste-score (score 'hoogste-score)))
+;    (define (check-score)
+;      (let ((huidige-score (score 'huidige-score))
+;            (hoogste-score (score 'hoogste-score)))
         
 
 
@@ -160,7 +160,7 @@
       (beweeg-kogels!)
       (set! alien-schiettijd (+ alien-schiettijd tijdsverschil))
       (schiet-alienkogel!)
-      (check-geraakt teken-adt)
+      (check-geraakt teken-adt))
     
     
     ;; toets! : any -> /
