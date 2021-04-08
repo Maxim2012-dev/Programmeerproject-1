@@ -16,6 +16,8 @@
 
 (define raket-start-x 5)
 (define raket-start-y (- spel-hoogte 8))
+(define score-tekst-x 5)
+(define score-tekst-y (- spel-hoogte 5))
 (define y-buiten-speelveld 25)
 
 (define delay-alienschot 3000)
