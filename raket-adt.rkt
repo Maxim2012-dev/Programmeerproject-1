@@ -6,6 +6,7 @@
 ; constructor om raket aan te maken
 ; de raket begint altijd op een gegeven positie
 (define (maak-raket positie)
+  (let ((levens aantal-levens-raket))
 
 
   ; de beweeg! functie die de beweeg van positie gaat aanroepen
@@ -30,13 +31,19 @@
   (define (schiet!)
     (maak-kogel (maak-positie (positie 'x) (positie 'y))))
 
+  ; verminder-levens! : / -> /
+  (define (verminder-levens!)
+    (set! levens (- levens 1)))
+
   ; de dispatch functie
   (define (dispatch-raket msg)
     (cond((eq? msg 'beweeg!) beweeg!)
          ((eq? msg 'positie) positie)
          ((eq? msg 'schiet!) schiet!)
+         ((eq? msg 'levens) levens)
+         ((eq? msg 'verminder-levens!) verminder-levens!)
          (else (display "ongeldige boodschap - raket"))))
-  dispatch-raket)
+  dispatch-raket))
 
   
 

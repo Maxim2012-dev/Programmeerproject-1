@@ -24,7 +24,7 @@
   
   ; rand-geraakt? : / -> boolean
   (define (rand-geraakt?)
-    ((positie 'rand?)))
+    ((positie 'rand-horizontaal?)))
 
   ; schiet! operatie gaat een nieuwe kogel aanmaken op de positie van de raket
   (define (schiet!)

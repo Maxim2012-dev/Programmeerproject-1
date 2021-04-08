@@ -54,7 +54,7 @@
     ; maakt een nieuwe tile aan en voegt deze toe aan de laag en geeft deze dan terug
     (define (voeg-kogel-toe! kogel-adt)
       (let ((nieuwe-tile
-             (make-bitmap-tile "afbeeldingen/kogel.png")))
+             (make-bitmap-tile "afbeeldingen/kogel.png" "afbeeldingen/kogel-mask.png")))
         (set! kogel-tiles (cons (cons kogel-adt nieuwe-tile) kogel-tiles))
         ((kogel-laag 'add-drawable) nieuwe-tile)
         nieuwe-tile))
@@ -123,11 +123,12 @@
           (teken-object! kogel-adt tile)))
     
 
+    ;; verwijder-kogel! : Kogel -> /
     (define (verwijder-kogel! kogel-adt)
       (let ((tile (neem-kogel kogel-adt)))
         ((kogel-laag 'remove-drawable) tile)))
 
-
+    ;; teken-kogels! : list -> /
     (define (teken-kogels! kogels-lijst)
       (let ((lijst (kogels-lijst 'kogels-lijst)))
         ((kogels-lijst 'voor-alle-kogels) teken-kogel!)))
