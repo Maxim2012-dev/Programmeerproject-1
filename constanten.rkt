@@ -15,6 +15,7 @@
 (define snelheid-kogel 50)
 
 (define raket-start-x 5)
+(define raket-start-y (- spel-hoogte 8))
 (define y-buiten-speelveld 25)
 
 (define delay-alienschot 3000)

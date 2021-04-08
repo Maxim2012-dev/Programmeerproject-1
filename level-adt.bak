@@ -72,7 +72,7 @@
              (type-kogel (kogel-adt 'type)))
         (if (not raakt-rand?)
             ((kogel-adt 'beweeg!) type-kogel)
-            ((kogel-adt 'stop)))))
+            ((kogels 'verwijder-kogel!) kogel-adt)))) 
     
 
     ;; Dit is de procedure die constant checkt of één van de kogels
@@ -140,11 +140,7 @@
       (beweeg-kogels!)
       (set! alien-schiettijd (+ alien-schiettijd tijdsverschil))
       (schiet-alienkogel!)
-      (check-geraakt teken-adt)
-      (display 'raketlevens:)
-      (display (raket 'levens))
-      (newline)
-      (newline))
+      (check-geraakt teken-adt))
     
     
     ;; toets! : any -> /

@@ -11,14 +11,14 @@
 
     ((scherm 'set-background!) "black")
 
-
-    ;; --------------- LAGEN EN TILES ---------------
+    
 
     ; Raketlaag en tile aanmaken
     (define raket-laag (scherm 'make-layer))
     (define raket-tile
       (make-bitmap-tile "afbeeldingen/raket.png"))
     ((raket-laag 'add-drawable) raket-tile)
+
 
     ; Alienlaag aanmaken
     (define alien-laag (scherm 'make-layer))
@@ -27,13 +27,6 @@
     ; Kogellaag en tile aanmaken
     (define kogel-laag (scherm 'make-layer))
     (define kogel-tiles '())
-
-    ; Scorelaag aanmaken
-    (define score-laag (scherm 'make-layer))
-
-
-    ;; --------------- TILES GENEREREN ---------------
-    
 
     ;; voeg-alienschip-toe! : alienschip -> tile
     ; Maakt een bitmap-tile aan voor een bepaald alienschipobject
@@ -76,7 +69,7 @@
     
 
 
-    ;; --------------- TEKEN FUNCTIES ---------------
+    ;; Teken functies
 
     ;; Generische teken functie
     ; Deze functie vereenvoudigd het tekenproces van de objecten in het spel
@@ -90,10 +83,8 @@
              (scherm-y (* cel-hoogte-px obj-y)))
         ((tile 'set-x!) scherm-x)
         ((tile 'set-y!) scherm-y)))
-    
 
-    ;; ---------------> Tekenen <---------------
-    
+
     ;; Raket
     ;; teken-raket! : Raket -> /
     (define (teken-raket! raket-adt)
@@ -132,9 +123,6 @@
           (teken-object! kogel-adt tile)))
     
 
-    ;; ---------------> Verwijderen <---------------
-
-    
     ;; verwijder-kogel! : Kogel -> /
     (define (verwijder-kogel! kogel-adt)
       (let ((tile (neem-kogel kogel-adt)))
@@ -146,7 +134,7 @@
         ((kogels-lijst 'voor-alle-kogels) teken-kogel!)))
     
 
-    ;; --------------- CALLBACKS INSTELLEN ---------------
+    ;; Callbacks instellen
 
     ;; set-spel-lus-functie! : (number -> /) -> /
     (define (set-spel-lus-functie! func)
