@@ -123,12 +123,11 @@
           (teken-object! kogel-adt tile)))
     
 
-    ;; verwijder-kogel! : Kogel -> /
     (define (verwijder-kogel! kogel-adt)
       (let ((tile (neem-kogel kogel-adt)))
         ((kogel-laag 'remove-drawable) tile)))
 
-    ;; teken-kogels! : list -> /
+
     (define (teken-kogels! kogels-lijst)
       (let ((lijst (kogels-lijst 'kogels-lijst)))
         ((kogels-lijst 'voor-alle-kogels) teken-kogel!)))
