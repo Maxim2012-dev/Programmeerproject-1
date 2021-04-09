@@ -28,15 +28,37 @@
     (define kogel-laag (scherm 'make-layer))
     (define kogel-tiles '())
 
-    ; Scorelaag en tile
+    ; Scorelaag en tiles
     (define score-laag (scherm 'make-layer))
-    (define score-tile (make-tile 70 60))
-    ((score-tile 'draw-rectangle) 10 10 65 55 "red")
-    ((score-tile 'draw-text) "000" 25 15 15 "white")
-    ((score-laag 'add-drawable) score-tile)
-    ((score-tile 'set-x) score-text-x)
-    ((score-tile 'set-y) score-text-y)
+    (define score-label-tile (make-tile 100 40))
+    (define punten-tile (make-tile 60 40))
+    (define record-label-tile (make-tile 100 40))
+    (define record-punten-tile (make-tile 60 40))
 
+;    ((score-label-tile 'draw-rectangle) 0 0 100 40 "red")
+;    ((punten-tile 'draw-rectangle) 0 0 60 40 "red")
+;    ((record-label-tile 'draw-rectangle) 0 0 100 40 "red")
+;    ((record-punten-tile 'draw-rectangle) 0 0 60 40 "red")
+
+    ((score-label-tile 'draw-text) "score : " 20 5 5 "white")
+    ((punten-tile 'draw-text) "000" 20 5 5 "white")
+    ((record-label-tile 'draw-text) "record : " 20 5 5 "white")
+    ((record-punten-tile 'draw-text) "000" 20 5 5 "white")
+
+    ((score-laag 'add-drawable) score-label-tile)
+    ((score-laag 'add-drawable) punten-tile)
+    ((score-laag 'add-drawable) record-label-tile)
+    ((score-laag 'add-drawable) record-punten-tile)
+
+    ((score-label-tile 'set-x!) score-label-tekst-x)
+    ((score-label-tile 'set-y!) score-label-tekst-y)
+    ((punten-tile 'set-x!) punten-tekst-x)
+    ((punten-tile 'set-y!) punten-tekst-y)
+
+    ((record-label-tile 'set-x!) record-label-tekst-x)
+    ((record-label-tile 'set-y!) record-label-tekst-y)
+    ((record-punten-tile 'set-x!) record-punten-tekst-x)
+    ((record-punten-tile 'set-y!) record-punten-tekst-y)
 
     ;; --------------- TILES GENEREREN ---------------
     
@@ -124,19 +146,31 @@
       (let ((tile (neem-alienschip alienschip-adt)))
         (teken-object! alienschip-adt tile)))
 
-
     ;; Alienvloot
     ;; teken-vloot! : Vloot -> /
     (define (teken-vloot! alienvloot-adt)
       ((alienvloot-adt 'voor-alle-schepen) teken-alienschip!))
-
 
     ;; Kogel
     ;; teken-kogel! : Kogel -> /
     (define (teken-kogel! kogel-adt)
       (let ((tile (neem-kogel kogel-adt)))
           (teken-object! kogel-adt tile)))
-    
+
+    ;; teken-kogels! : list -> /
+    (define (teken-kogels! kogels-lijst)
+      (let ((lijst (kogels-lijst 'kogels-lijst)))
+        ((kogels-lijst 'voor-alle-kogels) teken-kogel!)))
+
+    ;; Score
+    ;; teken-score! : 
+    (define (teken-score score)
+      (let* ((huidige-score (score 'huidige-score))
+             (score-tekst (number->string huidige-score)))
+        (punten-tile 'clear)
+        (if (< huidige-score 100)
+            ((punten-tile 'draw-text) (string-append "0" score-tekst) 20 5 5 "white")
+            ((punten-tile 'draw-text) score-tekst 20 5 5 "white"))))
 
     ;; ---------------> Verwijderen <---------------
 
@@ -145,11 +179,6 @@
     (define (verwijder-kogel! kogel-adt)
       (let ((tile (neem-kogel kogel-adt)))
         ((kogel-laag 'remove-drawable) tile)))
-
-    ;; teken-kogels! : list -> /
-    (define (teken-kogels! kogels-lijst)
-      (let ((lijst (kogels-lijst 'kogels-lijst)))
-        ((kogels-lijst 'voor-alle-kogels) teken-kogel!)))
     
 
     ;; --------------- CALLBACKS INSTELLEN ---------------
@@ -168,6 +197,7 @@
       (cond ((eq? msg 'set-toets-functie!) set-toets-functie!)
             ((eq? msg 'set-spel-lus-functie!) set-spel-lus-functie!)
             ((eq? msg 'teken-spel!) teken-spel!)
+            ((eq? msg 'teken-score) teken-score)
             ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
             (else (display "geen geldige boodschap"))))
 

@@ -92,8 +92,7 @@
         (define (iter kogels-lijst)
           (if (not (null? kogels-lijst))
               (let* ((kogel (car kogels-lijst))
-                     (raket-kogel? (eq? (kogel 'type) 'raket))
-                     (alien-kogel? (eq? (kogel 'type) 'alien)))
+                     (raket-kogel? (eq? (kogel 'type) 'raket)))
                 (if raket-kogel?
                     ; Als raket-kogel? dan...
                     (begin ((alienvloot 'voor-alle-schepen)
@@ -102,6 +101,7 @@
                               (cond ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
                                           (eq? (kogel 'type) 'raket)
                                           (= (alien 'levens) 1))
+                                     (bepaal-score alien teken-adt)
                                      (verwijder-alienschip! alien)
                                      (verwijder-kogel! kogel)
                                      ((teken-adt 'verwijder-kogel!) kogel))
@@ -133,7 +133,16 @@
 ;    (define (check-score)
 ;      (let ((huidige-score (score 'huidige-score))
 ;            (hoogste-score (score 'hoogste-score)))
-        
+
+
+    ; score wordt bepaald op basis van de alien die werd neergeschoten
+    ; bepaal-score : Alien -> /
+    (define (bepaal-score alien teken-adt)
+      (let ((soort-alien (alien 'kleur)))
+        (cond ((eq? soort-alien 'blauw) ((score 'verhoog-score!) 10))
+              ((eq? soort-alien 'geel) ((score 'verhoog-score!) 20))
+              ((eq? soort-alien 'paars) ((score 'verhoog-score!) 30)))
+        ((teken-adt 'teken-score) score)))
 
 
     ;; --------------- VERWIJDER - FUNCTIES ---------------
