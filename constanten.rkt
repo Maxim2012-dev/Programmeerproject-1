@@ -9,7 +9,7 @@
 
 (define aantal-rijen-aliens 5)
 (define aantal-aliens-per-rij 11)
-(define aantal-levens-raket 3)
+(define aantal-levens-raket 5)
 
 (define snelheid-vloot 1000)
 (define snelheid-kogel 50)
@@ -18,8 +18,8 @@
 (define raket-start-y (- spel-hoogte 4))
 
 (define score-bord-y 5)
-(define score-pos (- (/ venster-breedte-px 2) 230))
-(define record-pos (+ (/ venster-breedte-px 2) 70))
+(define score-pos (- (/ venster-breedte-px 2) 170))
+(define record-pos (+ (/ venster-breedte-px 2) 10))
 
 (define score-label-tekst-x score-pos)
 (define score-label-tekst-y score-bord-y)
@@ -30,6 +30,11 @@
 (define record-label-tekst-y score-bord-y)
 (define record-punten-tekst-x (+ record-pos 105))
 (define record-punten-tekst-y score-bord-y)
+
+(define levens-x 10)
+(define levens-y 5)
+(define raket-image-x 50)
+(define raket-image-y 5)
 
 (define y-buiten-speelveld 25)
 

@@ -28,27 +28,24 @@
     (define kogel-laag (scherm 'make-layer))
     (define kogel-tiles '())
 
-    ; Scorelaag en tiles
-    (define score-laag (scherm 'make-layer))
+    ; Score / Levenslaag en tiles
+    (define score-levenslaag (scherm 'make-layer))
+
+    ; ---------> Score <---------
     (define score-label-tile (make-tile 100 40))
     (define punten-tile (make-tile 60 40))
     (define record-label-tile (make-tile 100 40))
     (define record-punten-tile (make-tile 60 40))
-
-;    ((score-label-tile 'draw-rectangle) 0 0 100 40 "red")
-;    ((punten-tile 'draw-rectangle) 0 0 60 40 "red")
-;    ((record-label-tile 'draw-rectangle) 0 0 100 40 "red")
-;    ((record-punten-tile 'draw-rectangle) 0 0 60 40 "red")
 
     ((score-label-tile 'draw-text) "score : " 20 5 5 "white")
     ((punten-tile 'draw-text) "000" 20 5 5 "white")
     ((record-label-tile 'draw-text) "record : " 20 5 5 "white")
     ((record-punten-tile 'draw-text) "000" 20 5 5 "white")
 
-    ((score-laag 'add-drawable) score-label-tile)
-    ((score-laag 'add-drawable) punten-tile)
-    ((score-laag 'add-drawable) record-label-tile)
-    ((score-laag 'add-drawable) record-punten-tile)
+    ((score-levenslaag 'add-drawable) score-label-tile)
+    ((score-levenslaag 'add-drawable) punten-tile)
+    ((score-levenslaag 'add-drawable) record-label-tile)
+    ((score-levenslaag 'add-drawable) record-punten-tile)
 
     ((score-label-tile 'set-x!) score-label-tekst-x)
     ((score-label-tile 'set-y!) score-label-tekst-y)
@@ -60,6 +57,19 @@
     ((record-punten-tile 'set-x!) record-punten-tekst-x)
     ((record-punten-tile 'set-y!) record-punten-tekst-y)
 
+    ; ---------> Levens <---------
+    (define levens-tile (make-tile 32 32))
+    (define raket-image-tile (make-bitmap-tile "afbeeldingen/raket_image.png"))
+    ((levens-tile 'draw-text) "5" 20 0 0 "white")
+
+    ((score-levenslaag 'add-drawable) levens-tile)
+    ((score-levenslaag 'add-drawable) raket-image-tile)
+    
+    ((levens-tile 'set-x!) levens-x)
+    ((levens-tile 'set-y!) levens-y)
+    ((raket-image-tile 'set-x!) raket-image-x)
+    ((raket-image-tile 'set-y!) raket-image-y)
+    
     ;; --------------- TILES GENEREREN ---------------
     
 
@@ -162,6 +172,13 @@
       (let ((lijst (kogels-lijst 'kogels-lijst)))
         ((kogels-lijst 'voor-alle-kogels) teken-kogel!)))
 
+    ;; teken-levens! : Raket -> /
+    (define (teken-levens! raket)
+      (let* ((aantal-levens (raket 'levens))
+             (levens-tekst (number->string aantal-levens)))
+        (levens-tile 'clear)
+        ((levens-tile 'draw-text) levens-tekst 20 0 0 "white")))
+
     ;; Score
     ;; teken-score! : 
     (define (teken-score score)
@@ -198,6 +215,7 @@
             ((eq? msg 'set-spel-lus-functie!) set-spel-lus-functie!)
             ((eq? msg 'teken-spel!) teken-spel!)
             ((eq? msg 'teken-score) teken-score)
+            ((eq? msg 'teken-levens!) teken-levens!)
             ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
             (else (display "geen geldige boodschap"))))
 

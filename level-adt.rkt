@@ -122,6 +122,7 @@
                            ((raket 'verminder-levens!))
                            ((kogels 'verwijder-kogel!) kogel)
                            ((teken-adt 'verwijder-kogel!) kogel)
+                           ((teken-adt 'teken-levens!) raket)
                            (iter (cdr kogels-lijst)))))
                 (iter (cdr kogels-lijst)))))
         (iter kogels-lijst)))
