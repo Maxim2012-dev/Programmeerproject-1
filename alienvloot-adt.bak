@@ -12,7 +12,7 @@
          (size (vector-length schepen)))
 
 
-    (define (afstand-tussen-rijen idx) (* 1 idx))
+    (define (afstand-tussen-rijen idx) (+ 3 idx))
     (define (afstand-tussen-kolommen idx) (* 2 idx))
 
     ; Elke plaats in de vector opvullen met een alienschip object

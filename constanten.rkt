@@ -9,7 +9,7 @@
 
 (define aantal-rijen-aliens 5)
 (define aantal-aliens-per-rij 11)
-(define aantal-levens-raket 5)
+(define aantal-levens-raket 2)
 
 (define snelheid-vloot 1000)
 (define snelheid-kogel 50)
@@ -39,3 +39,4 @@
 (define y-buiten-speelveld 25)
 
 (define delay-alienschot 3000)
+(define game-over-delay 5000)

@@ -27,10 +27,6 @@
   (define (rand-geraakt?)
     ((positie 'rand-horizontaal?)))
 
-  ; positie! : Positie -> /
-  (define (positie! nieuwe_positie)
-    (set! positie nieuwe_positie))
-
   ; schiet! operatie gaat een nieuwe kogel aanmaken op de positie van de raket
   (define (schiet!)
     (maak-kogel (maak-positie (positie 'x) (positie 'y))))
@@ -39,19 +35,13 @@
   (define (verminder-levens!)
     (set! levens (- levens 1)))
 
-  ; reset-levens! : /> /
-  (define (reset-levens!)
-    (set! levens aantal-levens-raket))
-
   ; de dispatch functie
   (define (dispatch-raket msg)
     (cond((eq? msg 'beweeg!) beweeg!)
          ((eq? msg 'positie) positie)
-         ((eq? msg 'positie!) positie!)
          ((eq? msg 'schiet!) schiet!)
          ((eq? msg 'levens) levens)
          ((eq? msg 'verminder-levens!) verminder-levens!)
-         ((eq? msg 'reset-levens!) reset-levens!)
          (else (display "ongeldige boodschap - raket"))))
   dispatch-raket))
 

@@ -16,7 +16,7 @@
     (define (afstand-tussen-kolommen idx) (* 2 idx))
 
     ; Elke plaats in de vector opvullen met een alienschip object
-    (define (vul-vloot)
+    (define (vul-vloot!)
       (let outer-loop
         ((outer-idx 0))
         (if (< outer-idx size)
@@ -42,7 +42,7 @@
                   (outer-loop (+ outer-idx 1)))))))
     
     
-    (vul-vloot)
+    (vul-vloot!)
     
 
     ; Een for-each om op elk alienschip een functie los te laten
@@ -103,6 +103,7 @@
             ((eq? msg 'schepen) schepen)
             ((eq? msg 'verwijder-schip!) verwijder-schip!)
             ((eq? msg 'voor-alle-schepen) voor-alle-schepen)
+            ((eq? msg 'vul-vloot!) vul-vloot!)
             (else "verkeerde boodschap - alienvloot")))
     dispatch-alienvloot))
                   

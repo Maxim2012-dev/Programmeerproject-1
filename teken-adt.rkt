@@ -179,15 +179,25 @@
         (levens-tile 'clear)
         ((levens-tile 'draw-text) levens-tekst 20 0 0 "white")))
 
-    ;; Score
-    ;; teken-score! : 
-    (define (teken-score score)
+    ;; huidige score
+    ;; teken-huidige-score! : Score -> /
+    (define (teken-huidige-score score)
       (let* ((huidige-score (score 'huidige-score))
              (score-tekst (number->string huidige-score)))
         (punten-tile 'clear)
         (if (< huidige-score 100)
             ((punten-tile 'draw-text) (string-append "0" score-tekst) 20 5 5 "white")
             ((punten-tile 'draw-text) score-tekst 20 5 5 "white"))))
+
+    ;; hoogste score
+    ;; teken-hoogste-score! : 
+    (define (teken-hoogste-score score)
+      (let* ((hoogste-score (score 'hoogste-score))
+             (score-tekst (number->string hoogste-score)))
+        (record-punten-tile 'clear)
+        (if (< hoogste-score 100)
+            ((record-punten-tile 'draw-text) (string-append "0" score-tekst) 20 5 5 "white")
+            ((record-punten-tile 'draw-text) score-tekst 20 5 5 "white"))))
 
     ;; ---------------> Verwijderen <---------------
 
@@ -196,6 +206,15 @@
     (define (verwijder-kogel! kogel-adt)
       (let ((tile (neem-kogel kogel-adt)))
         ((kogel-laag 'remove-drawable) tile)))
+
+    ;; verwijder-vloot! : Alienvloot -> /
+    (define (verwijder-vloot! alienvloot)
+      ((alienvloot 'voor-alle-schepen) verwijder-alien!))
+
+    ;; verwijder-alien! : Alien -> /
+    (define (verwijder-alien! alien)
+      (let ((tile (neem-alienschip alien)))
+        ((alien-laag 'remove-drawable) tile)))
     
 
     ;; --------------- CALLBACKS INSTELLEN ---------------
@@ -214,9 +233,11 @@
       (cond ((eq? msg 'set-toets-functie!) set-toets-functie!)
             ((eq? msg 'set-spel-lus-functie!) set-spel-lus-functie!)
             ((eq? msg 'teken-spel!) teken-spel!)
-            ((eq? msg 'teken-score) teken-score)
+            ((eq? msg 'teken-huidige-score) teken-huidige-score)
+            ((eq? msg 'teken-hoogste-score) teken-hoogste-score)
             ((eq? msg 'teken-levens!) teken-levens!)
             ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
+            ((eq? msg 'verwijder-vloot!) verwijder-vloot!)
             (else (display "geen geldige boodschap"))))
 
     dispatch-teken))
