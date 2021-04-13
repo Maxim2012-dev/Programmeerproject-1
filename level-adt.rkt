@@ -41,10 +41,9 @@
     (define (beweeg-kogels!)
       (if (and (not (null? (kogels 'kogels-lijst)))
                (>= kogel-tijd snelheid-kogel))
-          (let ((lijst-kogels (kogels 'kogels-lijst)))
-            (begin
-              ((kogels 'voor-alle-kogels) roep-beweeg-op)
-              (set! kogel-tijd 0)))))
+          (begin
+            ((kogels 'voor-alle-kogels) roep-beweeg-op)
+            (set! kogel-tijd 0))))
 
 
     ;; roep-beweeg-op : kogel-adt -> /
@@ -125,7 +124,7 @@
                            ((raket 'verminder-levens!))
                            ((kogels 'verwijder-kogel!) kogel)
                            ((teken-adt 'verwijder-kogel!) kogel)
-                           ((teken-adt 'teken-levens!) raket)
+                           ((teken-adt 'teken-levens) raket)
                            (iter (cdr kogels-lijst)))))
                 (iter (cdr kogels-lijst)))))
         (iter kogels-lijst)))
@@ -170,9 +169,19 @@
     ;; --------------- GAME-OVER ---------------
 
 
-    ;; Wordt opgeroepen als de raket geen levens meer heeft
+    ; Als vloot bij de raket is dan : game-over? -> true
+    ; check-vloot-onderkant : / -> /
+    (define (check-vloot-onderkant)
+      (let ((onderkant? (alienvloot 'onderkant-geraakt?)))
+        (if onderkant?
+            (begin
+              (set! game-over-tijd 0)
+              (set! game-over? #t)))))
+    
     ;; maak-nieuw-spel! : / -> /
     (define (maak-nieuw-spel! teken-adt)
+      (display game-over-tijd) (newline)
+      (check-vloot-onderkant)
       (if (and game-over?
                (> game-over-tijd game-over-delay))
           (begin (set! game-over? #f)
@@ -185,7 +194,7 @@
 
                  ; levens van raket terug op 5 zetten
                  ((raket 'reset-levens!))
-                 ((teken-adt 'teken-levens!) raket)
+                 ((teken-adt 'teken-levens) raket)
 
                  ; positie van raket op startpositie
                  ((raket 'positie!) raket-start-positie)
@@ -219,8 +228,9 @@
     
     ;; toets! : any -> /
     (define (toets! toets)
-      (beweeg-raket! toets)
-      (schiet-raketkogel! toets))
+      (if (not game-over?)
+          (begin (beweeg-raket! toets)
+                 (schiet-raketkogel! toets))))
     
     
     ; Dispatch

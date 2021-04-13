@@ -19,9 +19,12 @@
     (define (rand-geraakt?)
       ((positie 'rand-horizontaal?)))
 
-    ; onderkant? : / -> boolean
     (define (onderkant?)
       (= (positie 'y) raket-start-y))
+
+    ; schiet! operatie gaat een nieuwe kogel aanmaken op de positie van het alienschip
+    (define (schiet!)
+      (maak-kogel positie))
 
     ; kleur! gaat de kleur/soort van de huidige alien aanpassen naar een nieuwe kleur
     (define (kleur! nieuwe_kleur)
@@ -38,10 +41,10 @@
 
     ; de dispatch functie
     (define (dispatch-alienschip msg)
-      (cond((eq? msg 'beweeg!) beweeg!)
+      (cond((eq? msg 'beweeg) beweeg!)
            ((eq? msg 'positie) positie)
+           ((eq? msg 'schiet) schiet!)
            ((eq? msg 'rand-geraakt?) rand-geraakt?)
-           ((eq? msg 'onderkant?) onderkant?)
            ((eq? msg 'kleur) kleur)
            ((eq? msg 'kleur!) kleur!)
            ((eq? msg 'levens) levens)

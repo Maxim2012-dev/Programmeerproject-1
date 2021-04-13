@@ -172,8 +172,8 @@
       (let ((lijst (kogels-lijst 'kogels-lijst)))
         ((kogels-lijst 'voor-alle-kogels) teken-kogel!)))
 
-    ;; teken-levens! : Raket -> /
-    (define (teken-levens! raket)
+    ;; teken-levens : Raket -> /
+    (define (teken-levens raket)
       (let* ((aantal-levens (raket 'levens))
              (levens-tekst (number->string aantal-levens)))
         (levens-tile 'clear)
@@ -235,7 +235,7 @@
             ((eq? msg 'teken-spel!) teken-spel!)
             ((eq? msg 'teken-huidige-score) teken-huidige-score)
             ((eq? msg 'teken-hoogste-score) teken-hoogste-score)
-            ((eq? msg 'teken-levens!) teken-levens!)
+            ((eq? msg 'teken-levens) teken-levens)
             ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
             ((eq? msg 'verwijder-vloot!) verwijder-vloot!)
             (else (display "geen geldige boodschap"))))

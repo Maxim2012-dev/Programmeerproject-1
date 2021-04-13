@@ -11,7 +11,7 @@
 (define aantal-aliens-per-rij 11)
 (define aantal-levens-raket 2)
 
-(define snelheid-vloot 1000)
+(define snelheid-vloot 100)
 (define snelheid-kogel 50)
 
 (define raket-start-x 5)

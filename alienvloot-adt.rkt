@@ -9,7 +9,8 @@
 (define (maak-alienvloot)
   (let* ((schepen (maak-matrix))
          (richting 'rechts)
-         (size (vector-length schepen)))
+         (size (vector-length schepen))
+         (onderkant-geraakt? #f))
 
 
     (define (afstand-tussen-rijen idx) (+ 3 idx))
@@ -46,6 +47,7 @@
     
 
     ; Een for-each om op elk alienschip een functie los te laten
+    ; voor-alle-schepen : <procedure> -> /
     (define (voor-alle-schepen fun)
       (let outer-loop
         ((outer-idx 0))
@@ -76,25 +78,36 @@
       (if (eq? richting 'rechts)
           (set! richting 'links)
           (set! richting 'rechts)))
-
+            
     
     ; beweeg! : / -> /
     (define (beweeg!)
-      ; rand checken
-      (let ((test-list '()))
-        (voor-alle-schepen (lambda (schip)
-                             (set! test-list (cons ((schip 'rand-geraakt?)) test-list))))
-        (if (not (member #t test-list))
-            (voor-alle-schepen roep-beweeg-op)
-            (begin (switch!)
-                   (voor-alle-schepen (lambda (schip)
-                                        ((schip 'beweeg) 'omlaag)))
-                   (voor-alle-schepen roep-beweeg-op)))))
+       (let ((test-list '()))
+         ; checken op zijranden en onderkant
+         (define (check-pos alien)
+           (cond (((alien 'rand-geraakt?))
+                  (set! test-list (cons 'rand test-list)))
+                 (((alien 'onderkant?))
+                  (set! test-list (cons 'onderkant test-list)))
+                 (else (set! test-list (cons #t test-list)))))
+         ; toepassen op alle aliens
+        (voor-alle-schepen check-pos)
+         ; bepalen wat er moet gebeuren op basis van test-list
+         (cond
+           ((member 'onderkant test-list)
+
+            (set! onderkant-geraakt? #t))
+           ((member 'rand test-list)
+            (switch!)
+            (voor-alle-schepen (lambda (schip)
+                                 ((schip 'beweeg!) 'omlaag)))
+            (voor-alle-schepen roep-beweeg-op))
+           (else (voor-alle-schepen roep-beweeg-op)))))
 
 
     ; roep-beweeg-op : alienschip-adt -> /
     (define (roep-beweeg-op schip-adt)
-      ((schip-adt 'beweeg) richting))
+      ((schip-adt 'beweeg!) richting))
 
 
     ;; dispatch-functie
@@ -104,6 +117,7 @@
             ((eq? msg 'verwijder-schip!) verwijder-schip!)
             ((eq? msg 'voor-alle-schepen) voor-alle-schepen)
             ((eq? msg 'vul-vloot!) vul-vloot!)
+            ((eq? msg 'onderkant-geraakt?) onderkant-geraakt?)
             (else "verkeerde boodschap - alienvloot")))
     dispatch-alienvloot))
                   
