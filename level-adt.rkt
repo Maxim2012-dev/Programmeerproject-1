@@ -178,10 +178,9 @@
               (set! game-over-tijd 0)
               (set! game-over? #t)))))
     
+    
     ;; maak-nieuw-spel! : / -> /
     (define (maak-nieuw-spel! teken-adt)
-      (display game-over-tijd) (newline)
-      (check-vloot-onderkant)
       (if (and game-over?
                (> game-over-tijd game-over-delay))
           (begin (set! game-over? #f)
@@ -202,10 +201,9 @@
                  ; vergelijken met record + huidige resetten
                  (vergelijk-met-hoogste! teken-adt)
                  ((score 'reset-score!))
-                 ((teken-adt 'teken-huidige-score) score))))
-    
-          
-          
+                 ((teken-adt 'teken-huidige-score) score)
+
+                 (display game-over?))))    
 
 
     ;; --------------- CALLBACKS ---------------
@@ -220,10 +218,11 @@
       (maak-nieuw-spel! teken-adt)
       ; Zolang niet game-over? blijf dit doen...
       (if (not game-over?)
-          (begin (beweeg-vloot!)
+          (begin (display "yes")(beweeg-vloot!)
                  (beweeg-kogels!)
                  (schiet-alienkogel!)
-                 (check-kogels-geraakt teken-adt))))
+                 (check-kogels-geraakt teken-adt)
+                 (check-vloot-onderkant))))
     
     
     ;; toets! : any -> /

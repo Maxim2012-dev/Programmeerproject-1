@@ -9,7 +9,7 @@
 
 (define aantal-rijen-aliens 5)
 (define aantal-aliens-per-rij 11)
-(define aantal-levens-raket 2)
+(define aantal-levens-raket 5)
 
 (define snelheid-vloot 100)
 (define snelheid-kogel 50)

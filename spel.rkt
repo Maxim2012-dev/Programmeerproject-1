@@ -13,4 +13,4 @@
 
 ; instantie maken van spel-adt om het spel op te starten
 (define spel (maak-spel))
-((spel 'start)) 
+((spel 'start))  
