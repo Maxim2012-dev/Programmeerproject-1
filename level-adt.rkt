@@ -175,6 +175,7 @@
       (let ((onderkant? (alienvloot 'onderkant-geraakt?)))
         (if onderkant?
             (begin
+              ((alienvloot 'reset-onderkant-geraakt!))
               (set! game-over-tijd 0)
               (set! game-over? #t)))))
     
@@ -201,9 +202,7 @@
                  ; vergelijken met record + huidige resetten
                  (vergelijk-met-hoogste! teken-adt)
                  ((score 'reset-score!))
-                 ((teken-adt 'teken-huidige-score) score)
-
-                 (display game-over?))))    
+                 ((teken-adt 'teken-huidige-score) score))))
 
 
     ;; --------------- CALLBACKS ---------------
@@ -218,7 +217,7 @@
       (maak-nieuw-spel! teken-adt)
       ; Zolang niet game-over? blijf dit doen...
       (if (not game-over?)
-          (begin (display "yes")(beweeg-vloot!)
+          (begin (beweeg-vloot!)
                  (beweeg-kogels!)
                  (schiet-alienkogel!)
                  (check-kogels-geraakt teken-adt)
