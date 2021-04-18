@@ -109,6 +109,10 @@
     (define (roep-beweeg-op schip-adt)
       ((schip-adt 'beweeg!) richting))
 
+    ; reset-onderkant-geraakt! : / -> /
+    (define (reset-onderkant-geraakt!)
+      (set! onderkant-geraakt? #f))
+
 
     ;; dispatch-functie
     (define (dispatch-alienvloot msg)
@@ -118,6 +122,7 @@
             ((eq? msg 'voor-alle-schepen) voor-alle-schepen)
             ((eq? msg 'vul-vloot!) vul-vloot!)
             ((eq? msg 'onderkant-geraakt?) onderkant-geraakt?)
+            ((eq? msg 'reset-onderkant-geraakt!) reset-onderkant-geraakt!)
             (else "verkeerde boodschap - alienvloot")))
     dispatch-alienvloot))
                   

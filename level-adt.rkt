@@ -166,7 +166,7 @@
 
 
 
-    ;; --------------- GAME-OVER ---------------
+    ;; --------------- GAME-OVER / NIEUW LEVEL ---------------
 
 
     ; Als vloot bij de raket is dan : game-over? -> true
@@ -178,8 +178,18 @@
               ((alienvloot 'reset-onderkant-geraakt!))
               (set! game-over-tijd 0)
               (set! game-over? #t)))))
-    
-    
+
+
+    ; check-vloot-vernietigd : / -> /
+    (define (check-vloot-vernietigd)
+      (let ((vernietigd? (alienvloot 'vloot-vernietigd?)))
+        (if vernietigd?
+            (begin
+              ((alienvloot 'reset-vloot-vernietigd!))
+              (set! game-over-tijd 0)
+              (set! game-over? #t)))))
+              
+      
     ;; maak-nieuw-spel! : / -> /
     (define (maak-nieuw-spel! teken-adt)
       (if (and game-over?
@@ -221,7 +231,8 @@
                  (beweeg-kogels!)
                  (schiet-alienkogel!)
                  (check-kogels-geraakt teken-adt)
-                 (check-vloot-onderkant))))
+                 (check-vloot-onderkant)
+                 (check-vloot-vernietigd))))
     
     
     ;; toets! : any -> /

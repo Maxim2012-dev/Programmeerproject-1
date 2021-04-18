@@ -10,7 +10,8 @@
   (let* ((schepen (maak-matrix))
          (richting 'rechts)
          (size (vector-length schepen))
-         (onderkant-geraakt? #f))
+         (onderkant-geraakt? #f)
+         (vloot-vernietigd? #f))
 
 
     (define (afstand-tussen-rijen idx) (+ 3 idx))
@@ -82,22 +83,27 @@
     
     ; beweeg! : / -> /
     (define (beweeg!)
-       (let ((test-list '()))
-         ; checken op zijranden en onderkant
+       (let ((edge-list '())
+             (status-list '()))
+         ; checken op zijranden en onderkant + status aliens bijhouden
          (define (check-pos alien)
            (cond (((alien 'rand-geraakt?))
-                  (set! test-list (cons 'rand test-list)))
+                  (set! edge-list (cons 'rand edge-list)))
                  (((alien 'onderkant?))
-                  (set! test-list (cons 'onderkant test-list)))
-                 (else (set! test-list (cons #t test-list)))))
+                  (set! edge-list (cons 'onderkant edge-list)))
+                 (else (set! edge-list (cons #t edge-list))))
+           (set! status-list (cons (alien 'status) status-list)))
          ; toepassen op alle aliens
         (voor-alle-schepen check-pos)
-         ; bepalen wat er moet gebeuren op basis van test-list
+         ; als geen enkele alien meer op actief staat, dan is het vloot vernietigd
+        (if (not (member 'actief status-list))
+            (set! vloot-vernietigd? #t))
+         ; bepalen wat er moet gebeuren op basis van edge-list
          (cond
-           ((member 'onderkant test-list)
+           ((member 'onderkant edge-list)
 
             (set! onderkant-geraakt? #t))
-           ((member 'rand test-list)
+           ((member 'rand edge-list)
             (switch!)
             (voor-alle-schepen (lambda (schip)
                                  ((schip 'beweeg!) 'omlaag)))
@@ -113,6 +119,10 @@
     (define (reset-onderkant-geraakt!)
       (set! onderkant-geraakt? #f))
 
+    ; reset-vloot-vernietigd! : / -> /
+    (define (reset-vloot-vernietigd!)
+      (set! vloot-vernietigd? #f))
+
 
     ;; dispatch-functie
     (define (dispatch-alienvloot msg)
@@ -122,7 +132,9 @@
             ((eq? msg 'voor-alle-schepen) voor-alle-schepen)
             ((eq? msg 'vul-vloot!) vul-vloot!)
             ((eq? msg 'onderkant-geraakt?) onderkant-geraakt?)
+            ((eq? msg 'vloot-vernietigd?) vloot-vernietigd?)
             ((eq? msg 'reset-onderkant-geraakt!) reset-onderkant-geraakt!)
+            ((eq? msg 'reset-vloot-vernietigd!) reset-vloot-vernietigd!)
             (else "verkeerde boodschap - alienvloot")))
     dispatch-alienvloot))
                   
