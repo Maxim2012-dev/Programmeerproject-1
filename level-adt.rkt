@@ -13,6 +13,7 @@
          (kogels (maak-kogels-adt))
          (score (maak-score))
          (alien-schiettijd 0)
+         (volgend-level? #f)
          (game-over-tijd 0)
          (game-over? #f)
          (vloot-tijd 0)
@@ -187,7 +188,8 @@
             (begin
               ((alienvloot 'reset-vloot-vernietigd!))
               (set! game-over-tijd 0)
-              (set! game-over? #t)))))
+              (set! game-over? #t)
+              (set! volgend-level? #t)))))
               
       
     ;; maak-nieuw-spel! : / -> /
@@ -202,17 +204,20 @@
                  ((teken-adt 'verwijder-vloot!) alienvloot)
                  ((alienvloot 'vul-vloot!))
 
-                 ; levens van raket terug op 5 zetten
-                 ((raket 'reset-levens!))
-                 ((teken-adt 'teken-levens) raket)
-
                  ; positie van raket op startpositie
                  ((raket 'positie!) raket-start-positie)
+                 (set! volgend-level? #f)
 
-                 ; vergelijken met record + huidige resetten
-                 (vergelijk-met-hoogste! teken-adt)
-                 ((score 'reset-score!))
-                 ((teken-adt 'teken-huidige-score) score))))
+                 (if (not volgend-level?)
+
+                     ; levens van raket terug op 5 zetten
+                     ((raket 'reset-levens!))
+                     ((teken-adt 'teken-levens) raket)
+
+                     ; vergelijken met record + huidige resetten
+                     (vergelijk-met-hoogste! teken-adt)
+                     ((score 'reset-score!))
+                     ((teken-adt 'teken-huidige-score) score))))
 
 
     ;; --------------- CALLBACKS ---------------
