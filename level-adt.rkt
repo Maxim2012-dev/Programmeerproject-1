@@ -205,19 +205,19 @@
                       ((raket 'positie!) raket-start-positie)
                       
                       (if volgend-level?
-
-                          (begin ((teken-adt 'verwijder-vloot!) alienvloot)
-                                 ((alienvloot 'vul-vloot!))
-                                 (set! volgend-level? #f))
                           
-                          ; levens van raket terug op 5 zetten
-                          ((raket 'reset-levens!))
-                          ((teken-adt 'teken-levens) raket)
+                          (begin ((teken-adt 'verwijder-vloot!) alienvloot)
+                                 ((alienvloot 'vul-vloot!) 'willekeurig)
+                                 (set! volgend-level? #f)))
+                          
+                      ; levens van raket terug op 5 zetten
+                      ((raket 'reset-levens!))
+                      ((teken-adt 'teken-levens) raket)
 
-                          ; vergelijken met record + huidige resetten
-                          (vergelijk-met-hoogste! teken-adt)
-                          ((score 'reset-score!))
-                          ((teken-adt 'teken-huidige-score) score)))))
+                      ; vergelijken met record + huidige resetten
+                      (vergelijk-met-hoogste! teken-adt)
+                      ((score 'reset-score!))
+                      ((teken-adt 'teken-huidige-score) score))))
 
 
          ;; --------------- CALLBACKS ---------------
