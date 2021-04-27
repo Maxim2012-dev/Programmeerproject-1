@@ -7,11 +7,11 @@
 (define venster-breedte-px (* cel-breedte-px spel-breedte))
 (define venster-hoogte-px (* cel-hoogte-px spel-hoogte))
 
-(define aantal-rijen-aliens 2)
-(define aantal-aliens-per-rij 4)
+(define aantal-rijen-aliens 6)
+(define aantal-aliens-per-rij 3)
 (define aantal-levens-raket 5)
 
-(define snelheid-vloot 100)
+(define snelheid-vloot 1000)
 (define snelheid-kogel 50)
 
 (define raket-start-x 5)

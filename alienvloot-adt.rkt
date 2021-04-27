@@ -30,34 +30,36 @@
               (define nieuw_alienschip (maak-alienschip (maak-positie
                                                          (afstand-tussen-kolommen (+ inner-idx 1))
                                                          (afstand-tussen-rijen outer-idx))))
+              ; in het geval van een willekeurig vloot
               (if (eq? type 'willekeurig)
-                  (bepaal-willekeurig nieuw_alienschip)
-                  ; kleur + levens toewijzen aan het nieuw alienschip
-                  (cond ((= outer-idx 0) ((nieuw_alienschip 'kleur!) 'paars)
-                                         ((nieuw_alienschip 'levens!) 3))
-                        ((= outer-idx 1) ((nieuw_alienschip 'kleur!) 'blauw)
-                                         ((nieuw_alienschip 'levens!) 1))
-                        ((= outer-idx 2) ((nieuw_alienschip 'kleur!) 'geel)
-                                         ((nieuw_alienschip 'levens!) 2))
-                        (else ((nieuw_alienschip 'kleur!) 'blauw)
-                              ((nieuw_alienschip 'levens!) 1))))
+                  (bepaal-willekeurig! nieuw_alienschip))
+              ; kleur + levens toewijzen aan het nieuw alienschip
+              (cond ((= outer-idx 0) ((nieuw_alienschip 'kleur!) 'paars)
+                                     ((nieuw_alienschip 'levens!) 3))
+                    ((= outer-idx 1) ((nieuw_alienschip 'kleur!) 'blauw)
+                                     ((nieuw_alienschip 'levens!) 1))
+                    ((= outer-idx 2) ((nieuw_alienschip 'kleur!) 'geel)
+                                     ((nieuw_alienschip 'levens!) 2))
+                    (else ((nieuw_alienschip 'kleur!) 'blauw)
+                          ((nieuw_alienschip 'levens!) 1)))
               (vector-set! inner-vector inner-idx nieuw_alienschip)
               (if (< (+ inner-idx 1) aantal-aliens-per-rij)
                   (inner-loop (+ inner-idx 1) inner-vector)
                   (outer-loop (+ outer-idx 1)))))))
     
-    
-    (vul-vloot! 'normaal)
 
     ; Er wordt een random-waarde berekend en slechts als deze 1 is wordt
     ; de huidige alien op actief gezet + buiten speelveld gezet
     ; bepaal-willekeurig : Alienschip -> /
-    (define (bepaal-willekeurig alien)
+    (define (bepaal-willekeurig! alien)
       (define random (random-integer 2))
       (if (= random 1)
           (begin
-            ((nieuw-alienschip 'zet-inactief))
-            (((nieuw_alienschip 'positie) 'y!) y-buiten-speelveld))))
+            ((alien 'zet-inactief!))
+            (((alien 'positie) 'y!) y-buiten-speelveld))))
+    
+    
+    (vul-vloot! 'normaal)
     
 
     ; Een for-each om op elk alienschip een functie los te laten
