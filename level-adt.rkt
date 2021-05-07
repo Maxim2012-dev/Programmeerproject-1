@@ -16,8 +16,10 @@
          (volgend-level? #f)
          (game-over-tijd 0)
          (game-over? #f)
+         (power-up #f)
+         (power-up-tijd 0)
          (vloot-tijd 0)
-         (kogel-tijd 0)
+         (kogel-tijd 0))
 
 
     ;; --------------- BEWEEG - OPERATIES ---------------
@@ -129,6 +131,18 @@
                            (iter (cdr kogels-lijst)))))
                 (iter (cdr kogels-lijst)))))
         (iter kogels-lijst)))
+    
+
+    ;; --------------- POWER-UP - OPERATIES ---------------
+    
+
+    ; Checken wanneer er een power-up moet worden vrijgegeven
+    ; check-power-up : / -> /
+    (define (check-power-up)
+      (let ((aliens (alienvloot 'aantal-vernietigde-schepen))
+            (power-up-trigger (modulo aliens aliens-power-up)))
+        (if (= power-up-trigger 0)
+        
 
 
     ;; --------------- SCORE - OPERATIES ---------------
@@ -171,25 +185,20 @@
 
 
     ; Als vloot bij de raket is dan : game-over? -> true
-    ; check-vloot-onderkant : / -> /
-    (define (check-vloot-onderkant)
-      (let ((onderkant? (alienvloot 'onderkant-geraakt?)))
-        (if onderkant?
-            (begin
-              ((alienvloot 'reset-onderkant-geraakt!))
-              (set! game-over-tijd 0)
-              (set! game-over? #t)))))
-
-
-    ; check-vloot-vernietigd : / -> /
-    (define (check-vloot-vernietigd)
-      (let ((vernietigd? (alienvloot 'vloot-vernietigd?)))
-        (if vernietigd?
-            (begin
-              ((alienvloot 'reset-vloot-vernietigd!))
-              (set! game-over-tijd 0)
-              (set! game-over? #t)
-              (set! volgend-level? #t)))))
+    ; of als alle aliens zijn vernietigd
+    ; check-vloot! : / -> /
+    (define (check-vloot!)
+      (let ((onderkant? (alienvloot 'onderkant-geraakt?))
+            (vernietigd? (alienvloot 'vloot-vernietigd?)))
+        (cond (onderkant?
+               ((alienvloot 'reset-onderkant-geraakt!))
+               (set! game-over-tijd 0)
+               (set! game-over? #t))
+              (vernietigd?
+               ((alienvloot 'reset-vloot-vernietigd!))
+               (set! game-over-tijd 0)
+               (set! game-over? #t)
+               (set! volgend-level? #t)))))
               
       
     ;; maak-nieuw-spel! : / -> /
@@ -235,8 +244,8 @@
                  (beweeg-kogels!)
                  (schiet-alienkogel!)
                  (check-kogels-geraakt teken-adt)
-                 (check-vloot-onderkant)
-                 (check-vloot-vernietigd))))
+                 (check-power-up)
+                 (check-vloot!))))
     
     
     ;; toets! : any -> /

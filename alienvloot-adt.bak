@@ -5,11 +5,13 @@
 (load "matrix.rkt")
 (load "alienschip-adt.rkt")
 (load "positie-adt.rkt")
+(#%require srfi/27)
 
 (define (maak-alienvloot)
   (let* ((schepen (maak-matrix))
          (richting 'rechts)
          (size (vector-length schepen))
+         (aantal-vernietigde-schepen 0)
          (onderkant-geraakt? #f)
          (vloot-vernietigd? #f))
 
@@ -29,6 +31,9 @@
               (define nieuw_alienschip (maak-alienschip (maak-positie
                                                          (afstand-tussen-kolommen (+ inner-idx 1))
                                                          (afstand-tussen-rijen outer-idx))))
+              ; in het geval van een willekeurig vloot
+              (if (eq? type 'willekeurig)
+                  (bepaal-willekeurig! nieuw_alienschip))
               ; kleur + levens toewijzen aan het nieuw alienschip
               (cond ((= outer-idx 0) ((nieuw_alienschip 'kleur!) 'paars)
                                      ((nieuw_alienschip 'levens!) 3))
@@ -43,8 +48,19 @@
                   (inner-loop (+ inner-idx 1) inner-vector)
                   (outer-loop (+ outer-idx 1)))))))
     
+
+    ; Er wordt een random-waarde berekend en slechts als deze 1 is wordt
+    ; de huidige alien op actief gezet + buiten speelveld gezet
+    ; bepaal-willekeurig : Alienschip -> /
+    (define (bepaal-willekeurig! alien)
+      (define random (random-integer 2))
+      (if (= random 1)
+          (begin
+            ((alien 'zet-inactief!))
+            (((alien 'positie) 'y!) y-buiten-speelveld))))
     
-    (vul-vloot!)
+    
+    (vul-vloot! 'normaal)
     
 
     ; Een for-each om op elk alienschip een functie los te laten
@@ -83,32 +99,32 @@
     
     ; beweeg! : / -> /
     (define (beweeg!)
-       (let ((edge-list '())
-             (status-list '()))
-         ; checken op zijranden en onderkant + status aliens bijhouden
-         (define (check-pos alien)
-           (cond (((alien 'rand-geraakt?))
-                  (set! edge-list (cons 'rand edge-list)))
-                 (((alien 'onderkant?))
-                  (set! edge-list (cons 'onderkant edge-list)))
-                 (else (set! edge-list (cons #t edge-list))))
-           (set! status-list (cons (alien 'status) status-list)))
-         ; toepassen op alle aliens
+      (let ((edge-list '())
+            (status-list '()))
+        ; checken op zijranden en onderkant + status aliens bijhouden
+        (define (check-pos alien)
+          (cond (((alien 'rand-geraakt?))
+                 (set! edge-list (cons 'rand edge-list)))
+                (((alien 'onderkant?))
+                 (set! edge-list (cons 'onderkant edge-list)))
+                (else (set! edge-list (cons #t edge-list))))
+          (set! status-list (cons (alien 'status) status-list)))
+        ; toepassen op alle aliens
         (voor-alle-schepen check-pos)
-         ; als geen enkele alien meer op actief staat, dan is het vloot vernietigd
+        ; als geen enkele alien meer op actief staat, dan is het vloot vernietigd
         (if (not (member 'actief status-list))
             (set! vloot-vernietigd? #t))
-         ; bepalen wat er moet gebeuren op basis van edge-list
-         (cond
-           ((member 'onderkant edge-list)
+        ; bepalen wat er moet gebeuren op basis van edge-list
+        (cond
+          ((member 'onderkant edge-list)
 
-            (set! onderkant-geraakt? #t))
-           ((member 'rand edge-list)
-            (switch!)
-            (voor-alle-schepen (lambda (schip)
-                                 ((schip 'beweeg!) 'omlaag)))
-            (voor-alle-schepen roep-beweeg-op))
-           (else (voor-alle-schepen roep-beweeg-op)))))
+           (set! onderkant-geraakt? #t))
+          ((member 'rand edge-list)
+           (switch!)
+           (voor-alle-schepen (lambda (schip)
+                                ((schip 'beweeg!) 'omlaag)))
+           (voor-alle-schepen roep-beweeg-op))
+          (else (voor-alle-schepen roep-beweeg-op)))))
 
 
     ; roep-beweeg-op : alienschip-adt -> /
@@ -122,6 +138,10 @@
     ; reset-vloot-vernietigd! : / -> /
     (define (reset-vloot-vernietigd!)
       (set! vloot-vernietigd? #f))
+
+    ; reset-aantal-vernietigde-schepen! : / -> /
+    (define (reset-aantal-vernietigde-schepen!)
+      (set! aantal-vernietigde-schepen 0))
 
 
     ;; dispatch-functie

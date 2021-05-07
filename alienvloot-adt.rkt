@@ -11,6 +11,7 @@
   (let* ((schepen (maak-matrix))
          (richting 'rechts)
          (size (vector-length schepen))
+         (aantal-vernietigde-schepen 0)
          (onderkant-geraakt? #f)
          (vloot-vernietigd? #f))
 
@@ -85,7 +86,8 @@
       (voor-alle-schepen (lambda (alien) (if (eq? alien alienschip-adt)
                                              (begin
                                                (((alien 'positie) 'y!) y-buiten-speelveld)
-                                               ((alien 'zet-inactief!)))))))
+                                               ((alien 'zet-inactief!))
+                                               (set! aantal-vernietigde-schepen (+ aantal-vernietigde-schepen 1)))))))
     
 
     ; switch! : / -> /
@@ -138,11 +140,16 @@
     (define (reset-vloot-vernietigd!)
       (set! vloot-vernietigd? #f))
 
+    ; reset-aantal-vernietigde-schepen! : / -> /
+    (define (reset-aantal-vernietigde-schepen!)
+      (set! aantal-vernietigde-schepen 0))
+
 
     ;; dispatch-functie
     (define (dispatch-alienvloot msg)
       (cond ((eq? msg 'beweeg) beweeg!)
             ((eq? msg 'schepen) schepen)
+            ((eq? msg 'aantal-vernietigde-schepen) aantal-vernietigde-schepen)
             ((eq? msg 'verwijder-schip!) verwijder-schip!)
             ((eq? msg 'voor-alle-schepen) voor-alle-schepen)
             ((eq? msg 'vul-vloot!) vul-vloot!)
@@ -150,6 +157,7 @@
             ((eq? msg 'vloot-vernietigd?) vloot-vernietigd?)
             ((eq? msg 'reset-onderkant-geraakt!) reset-onderkant-geraakt!)
             ((eq? msg 'reset-vloot-vernietigd!) reset-vloot-vernietigd!)
+            ((eq? msg 'reset-aantal-vernietigde-schepen!) reset-aantal-vernietigde-schepen!) 
             (else "verkeerde boodschap - alienvloot")))
     dispatch-alienvloot))
                   
