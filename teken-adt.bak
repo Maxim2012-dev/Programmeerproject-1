@@ -27,7 +27,6 @@
     ; Kogel / Power-Up-laag en tiles-lijst
     (define kogel-laag (scherm 'make-layer))
     (define kogel-tiles '())
-    (define power-up-tile #f)
 
     ; Score / Levenslaag en tiles
     (define score-levenslaag (scherm 'make-layer))
@@ -72,9 +71,6 @@
     ((raket-image-tile 'set-y!) raket-image-y)
     
     ;; --------------- TILES GENEREREN ---------------
-
-
-    ;; ----------> Aliens <----------
     
 
     ;; voeg-alienschip-toe! : alienschip -> tile
@@ -97,9 +93,6 @@
         (if resultaat
             (cdr resultaat)
             (voeg-alienschip-toe! alienschip-adt))))
-    
-
-    ;; ----------> Kogels <----------
 
 
     ;; voeg-kogel-toe! : / -> tile
@@ -118,19 +111,6 @@
         (if resultaat
             (cdr resultaat)
             (voeg-kogel-toe! kogel-adt))))
-
-    ;; ----------> Power-Ups <----------
-
-    (define (voeg-power-up-toe! power-up-adt)
-      (let ((type (power-up-adt 'type))
-            (nieuwe-tile (cond ((= type 1) (make-bitmap-tile "afbeeldingen/alien_geel.png"))
-                               ((= type 2) (make-bitmap-tile "afbeeldingen/alien_geel.png"))
-                               ((= type 3) (make-bitmap-tile "afbeeldingen/alien_geel.png"))
-                               ((= type 4) (make-bitmap-tile "afbeeldingen/alien_geel.png"))
-                               ((= type 5) (make-bitmap-tile "afbeeldingen/alien_geel.png")))))
-        (set! power-up-tile nieuwe-tile)
-        ((kogel-laag 'add-drawable) nieuwe-tile)
-        nieuwe-tile))
     
 
 
@@ -168,8 +148,7 @@
     (define (teken-level! level-adt)
       (teken-raket! (level-adt 'raket))
       (teken-vloot! (level-adt 'alienvloot))
-      (teken-kogels! (level-adt 'kogels))
-      (teken-power-up! (level-adt 'power-up)))
+      (teken-kogels! (level-adt 'kogels)))
 
     ;; Alienschip
     ;; teken-alienschip! : Alienschip -> /
@@ -184,13 +163,14 @@
 
     ;; Kogel
     ;; teken-kogel! : Kogel -> /
-    (define (teken-kogel! kogel)
-      (let ((tile (neem-kogel kogel)))
-          (teken-object! kogel tile)))
+    (define (teken-kogel! kogel-adt)
+      (let ((tile (neem-kogel kogel-adt)))
+          (teken-object! kogel-adt tile)))
 
     ;; teken-kogels! : list -> /
     (define (teken-kogels! kogels-lijst)
-      ((kogels-lijst 'voor-alle-kogels) teken-kogel!))
+      (let ((lijst (kogels-lijst 'kogels-lijst)))
+        ((kogels-lijst 'voor-alle-kogels) teken-kogel!)))
 
     ;; teken-levens : Raket -> /
     (define (teken-levens raket)
@@ -198,12 +178,6 @@
              (levens-tekst (number->string aantal-levens)))
         (levens-tile 'clear)
         ((levens-tile 'draw-text) levens-tekst 20 0 0 "white")))
-
-    ;; Power-Up
-    ;; teken-power-up
-    (define (teken-power-up! power-up)
-      (if power-up
-          (teken-object! power-up power-up-tile)))
 
     ;; huidige score
     ;; teken-huidige-score! : Score -> /
@@ -241,10 +215,6 @@
     (define (verwijder-alien! alien)
       (let ((tile (neem-alienschip alien)))
         ((alien-laag 'remove-drawable) tile)))
-
-    ;; verwijder-power-up! : Power-Up -> /
-    (define (verwijder-power-up! power-up)
-      ((kogel-laag 'remove-drawable) power-up-tile))
     
 
     ;; --------------- CALLBACKS INSTELLEN ---------------
@@ -268,7 +238,6 @@
             ((eq? msg 'teken-levens) teken-levens)
             ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
             ((eq? msg 'verwijder-vloot!) verwijder-vloot!)
-            ((eq? msg 'verwijder-power-up!) verwijder-power-up!)
             (else (display "geen geldige boodschap"))))
 
     dispatch-teken))

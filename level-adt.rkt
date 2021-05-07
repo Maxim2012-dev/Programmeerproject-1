@@ -136,13 +136,23 @@
     ;; --------------- POWER-UP - OPERATIES ---------------
     
 
+    ;; ----------> Validatie <----------
+    
+
     ; Checken wanneer er een power-up moet worden vrijgegeven
     ; check-power-up : / -> /
     (define (check-power-up)
       (let ((aliens (alienvloot 'aantal-vernietigde-schepen))
             (power-up-trigger (modulo aliens aliens-power-up)))
+        ; Om de 10 vernietigde aliens een power-up genereren op een willekeurige plek
         (if (= power-up-trigger 0)
-        
+            (let* ((matrix (alienvloot 'schepen))
+                  (rij-vector (vector-ref matrix (random-integer aantal-rijen-aliens)))
+                  (alien (vector-ref rij-vector (random-integer aantal-aliens-per-rij))))
+              (set! power-up (maak-power-up (alien 'positie)))))))
+    
+
+        ;; ----------> Validatie <----------
 
 
     ;; --------------- SCORE - OPERATIES ---------------
@@ -261,6 +271,7 @@
             ((eq? msg 'toets!) toets!)
             ((eq? msg 'raket) raket)
             ((eq? msg 'kogels) kogels)
+            ((eq? msg 'power-up) power-up)
             ((eq? msg 'alienvloot) alienvloot)
             (else (display "ongeldige boodschap"))))
 

@@ -38,6 +38,8 @@
 
 (define y-buiten-speelveld 25)
 
+(define power-up-types (vector 1 2 3 4 5))
+
 (define delay-alienschot 3000)
 (define game-over-delay 5000)
 (define aliens-power-up 10)
