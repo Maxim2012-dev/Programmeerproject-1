@@ -11,8 +11,9 @@
 (define aantal-aliens-per-rij 3)
 (define aantal-levens-raket 5)
 
-(define snelheid-vloot 100)
+(define snelheid-vloot 1000)
 (define snelheid-kogel 50)
+(define snelheid-power-up 200)
 
 (define raket-start-x 5)
 (define raket-start-y (- spel-hoogte 4))
@@ -42,4 +43,4 @@
 
 (define delay-alienschot 3000)
 (define game-over-delay 5000)
-(define aliens-power-up 10)
+(define aliens-power-up 3)

@@ -55,7 +55,6 @@
          ((eq? msg 'schiet!) schiet!)
          ((eq? msg 'levens) levens)
          ((eq? msg 'verminder-levens!) verminder-levens!)
-         ((eq? msg 'voeg-leven-toe!) voeg-leven-toe!)
          ((eq? msg 'reset-levens!) reset-levens!)
          (else (display "ongeldige boodschap - raket"))))
   dispatch-raket))

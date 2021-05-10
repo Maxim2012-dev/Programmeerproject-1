@@ -8,7 +8,6 @@
 (load "spel-adt.rkt")
 (load "constanten.rkt")
 (load "level-adt.rkt")
-(load "power-up-adt.rkt")
 (load "kogel-adt.rkt")
 (load "kogels-adt.rkt")
 

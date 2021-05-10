@@ -18,6 +18,7 @@
          (game-over? #f)
          (power-up #f)
          (power-up-tijd 0)
+         (power-up-duur 0)
          (vloot-tijd 0)
          (kogel-tijd 0))
 
@@ -29,7 +30,7 @@
       (cond ((eq? toets 'left)
              ((raket 'beweeg!) 'links))
             ((eq? toets 'right)
-             ((raket 'beweeg!) 'rechts))))
+             ((raket 'beweeg!) 'rechts)))) 
       
 
     ;; beweeg-vloot! : / -> /
@@ -47,6 +48,18 @@
           (begin
             ((kogels 'voor-alle-kogels) roep-beweeg-op)
             (set! kogel-tijd 0))))
+
+
+    ;; beweeg-power-up! : / -> /
+    (define (beweeg-power-up!)
+      (if (and power-up
+               (>= power-up-tijd snelheid-power-up))
+          (let* ((y ((power-up 'positie) 'y))
+                 (raakt-rand? (((power-up 'positie) 'rand-verticaal?))))
+            (if (not raakt-rand?)
+                (begin ((power-up 'beweeg!))
+                       (set! power-up-tijd 0))
+                (set! power-up #f)))))
 
 
     ;; roep-beweeg-op : kogel-adt -> /
@@ -138,22 +151,44 @@
 
     ;; ----------> Validatie <----------
     
-
     ; Checken wanneer er een power-up moet worden vrijgegeven
-    ; check-power-up : / -> /
-    (define (check-power-up)
-      (let ((aliens (alienvloot 'aantal-vernietigde-schepen))
-            (power-up-trigger (modulo aliens aliens-power-up)))
+    ; bepaal-power-up : / -> /
+    (define (bepaal-power-up!)
+      (let ((power-up-trigger (alienvloot 'aantal-vernietigde-schepen)))
         ; Om de 10 vernietigde aliens een power-up genereren op een willekeurige plek
-        (if (= power-up-trigger 0)
+        (if (= power-up-trigger aliens-power-up)
             (let* ((matrix (alienvloot 'schepen))
-                  (rij-vector (vector-ref matrix (random-integer aantal-rijen-aliens)))
-                  (alien (vector-ref rij-vector (random-integer aantal-aliens-per-rij))))
-              (set! power-up (maak-power-up (alien 'positie)))))))
+                   (rij-vector (vector-ref matrix (random-integer aantal-rijen-aliens)))
+                   (alien (vector-ref rij-vector (random-integer aantal-aliens-per-rij)))
+                   (pos-x ((alien 'positie) 'x))
+                   (pos-y ((alien 'positie) 'y)))
+              (set! power-up (maak-power-up (maak-positie pos-x pos-y)))
+              ((alienvloot 'reset-aantal-vernietigde-schepen!))))))
+
+    ; Bepalen welke procedure moet aangeroepen worden om zo de juiste power-up te activeren
+    (define (activeer-power-up teken-adt)
+      (let ((type (power-up 'type)))
+        (case (= type 1))
     
 
-        ;; ----------> Validatie <----------
+    ;; ----------> Raket-geraakt? <----------
 
+    ; Checken wanneer de power-up de raket raakt
+    (define (check-power-up-geraakt teken-adt)
+      (if power-up
+          (let* ((raket-pos (raket 'positie))
+                 (gelijk? ((raket-pos 'gelijk?) (power-up 'positie))))
+            (if gelijk?
+                (begin (activeer-power-up teken-adt)
+                       ((teken-adt 'verwijder-power-up!) power-up)
+                       (set! power-up #f))))))
+
+    ;; ----------> Activatieprocedures <----------
+            
+    ; Voor elke power-up een procedure die hem gaat activeren
+    (define (geef-extra-leven!)
+      ((raket 'voeg-leven-toe!)))
+    
 
     ;; --------------- SCORE - OPERATIES ---------------
 
@@ -216,7 +251,8 @@
       (if (and game-over?
                (> game-over-tijd game-over-delay))
           (begin (set! game-over? #f)
-          
+
+                 (display "game")
                  ; alle elementen resetten (vloot, levens, raket en score)
 
                  ; positie van raket op startpositie
@@ -246,15 +282,18 @@
       (set! game-over-tijd (+ game-over-tijd tijdsverschil))
       (set! vloot-tijd (+ vloot-tijd tijdsverschil))
       (set! kogel-tijd (+ kogel-tijd tijdsverschil))
+      (set! power-up-tijd (+ power-up-tijd tijdsverschil))
       (set! alien-schiettijd (+ alien-schiettijd tijdsverschil))
       (maak-nieuw-spel! teken-adt)
       ; Zolang niet game-over? blijf dit doen...
       (if (not game-over?)
           (begin (beweeg-vloot!)
                  (beweeg-kogels!)
+                 (beweeg-power-up!)
+                 (bepaal-power-up!)
                  (schiet-alienkogel!)
                  (check-kogels-geraakt teken-adt)
-                 (check-power-up)
+                 (check-power-up-geraakt teken-adt)
                  (check-vloot!))))
     
     
