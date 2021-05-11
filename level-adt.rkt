@@ -5,7 +5,7 @@
 (load "alienvloot-adt.rkt")
 (#%require srfi/27)
 
-(define (maak-level aantal-cellen-breedte aantal-cellen-hoogte)
+(define (maak-level aantal-cellen-breedte aantal-cellen-hoogte teken-adt)
   (let* ((raket-start-positie
           (maak-positie raket-start-x raket-start-y))
          (raket (maak-raket raket-start-positie))
@@ -102,8 +102,8 @@
 
     ;; Dit is de procedure die constant checkt of één van de kogels
     ;; ofwel een alien ofwel de raket raakt.
-    ;; check-kogels-geraakt : Teken-adt -> /
-    (define (check-kogels-geraakt teken-adt)
+    ;; check-kogels-geraakt : / -> /
+    (define (check-kogels-geraakt)
       (let ((kogels-lijst (kogels 'kogels-lijst)))
         ; itereren over alle kogels
         (define (iter kogels-lijst)
@@ -116,15 +116,18 @@
                             (lambda (alien)
                               ; kogel van RAKET raakt een alien + alien heeft 1 leven
                               (cond ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
-                                          (eq? (kogel 'type) 'raket)
                                           (= (alien 'levens) 1))
-                                     (bepaal-score! alien teken-adt)
+                                     ((alienvloot 'verhoog-vernietigde-schepen!))
+                                     ; checken voor power-up
+                                    (if (= (alienvloot 'aantal-vernietigde-schepen) aliens-power-up)
+                                        (creëer-power-up! alien))
+                                     (bepaal-score! alien)
                                      (verwijder-alienschip! alien)
                                      (verwijder-kogel! kogel)
                                      ((teken-adt 'verwijder-kogel!) kogel))
                                     ; kogel van RAKET raakt een alien + alien heeft meer dan 1 leven
                                     ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
-                                          (eq? (kogel 'type) 'raket))
+                                          (> (alien 'levens) 1))
                                      ((alien 'levens!) (- (alien 'levens) 1))
                                      (verwijder-kogel! kogel)
                                      ((teken-adt 'verwijder-kogel!) kogel)))))
@@ -151,35 +154,32 @@
 
     ;; ----------> Validatie <----------
     
-    ; Checken wanneer er een power-up moet worden vrijgegeven
-    ; bepaal-power-up : / -> /
-    (define (bepaal-power-up!)
-      (let ((power-up-trigger (alienvloot 'aantal-vernietigde-schepen)))
-        ; Om de 10 vernietigde aliens een power-up genereren op een willekeurige plek
-        (if (= power-up-trigger aliens-power-up)
-            (let* ((matrix (alienvloot 'schepen))
-                   (rij-vector (vector-ref matrix (random-integer aantal-rijen-aliens)))
-                   (alien (vector-ref rij-vector (random-integer aantal-aliens-per-rij)))
-                   (pos-x ((alien 'positie) 'x))
-                   (pos-y ((alien 'positie) 'y)))
-              (set! power-up (maak-power-up (maak-positie pos-x pos-y)))
-              ((alienvloot 'reset-aantal-vernietigde-schepen!))))))
+    ; om de 10 vernietigde aliens een nieuwe power-up aanmaken
+    ; op de positie van de laatst vernietigde alien
+    ; creëer-power-up : / -> /
+    (define (creëer-power-up! alien)
+      (let* ((pos-x ((alien 'positie) 'x))
+             (pos-y ((alien 'positie) 'y)))
+        (set! power-up (maak-power-up (maak-positie pos-x pos-y)))
+        ((alienvloot 'reset-aantal-vernietigde-schepen!))))
+    
 
     ; Bepalen welke procedure moet aangeroepen worden om zo de juiste power-up te activeren
-    (define (activeer-power-up teken-adt)
+    (define (activeer-power-up!)
       (let ((type (power-up 'type)))
-        (case (= type 1))
+        (cond ((= type 1) (geef-extra-leven!))
+              ((= type 2) (zet-vloot-terug!)))))
     
 
     ;; ----------> Raket-geraakt? <----------
 
     ; Checken wanneer de power-up de raket raakt
-    (define (check-power-up-geraakt teken-adt)
+    (define (check-power-up-geraakt)
       (if power-up
           (let* ((raket-pos (raket 'positie))
                  (gelijk? ((raket-pos 'gelijk?) (power-up 'positie))))
             (if gelijk?
-                (begin (activeer-power-up teken-adt)
+                (begin (zet-vloot-terug!)
                        ((teken-adt 'verwijder-power-up!) power-up)
                        (set! power-up #f))))))
 
@@ -187,15 +187,19 @@
             
     ; Voor elke power-up een procedure die hem gaat activeren
     (define (geef-extra-leven!)
-      ((raket 'voeg-leven-toe!)))
+      ((raket 'voeg-leven-toe!))
+      ((teken-adt 'teken-levens) raket))
+
+    (define (zet-vloot-terug!)
+      ((alienvloot 'zet-vloot-terug!)))
     
 
     ;; --------------- SCORE - OPERATIES ---------------
 
 
     ; vergelijkt huidige met hoogste score en past indien nodig aan
-    ; vergelijk-met-hoogste! Teken-adt -> /
-    (define (vergelijk-met-hoogste! teken-adt)
+    ; vergelijk-met-hoogste! / -> /
+    (define (vergelijk-met-hoogste!)
       (let ((huidige-score (score 'huidige-score)))
         (if ((score 'meer-dan-hoogste?))
             (begin ((score 'verander-hoogste!) huidige-score)
@@ -204,7 +208,7 @@
 
     ; score wordt bepaald op basis van de alien die werd neergeschoten
     ; bepaal-score : Alien -> /
-    (define (bepaal-score! alien teken-adt)
+    (define (bepaal-score! alien)
       (let ((soort-alien (alien 'kleur)))
         (cond ((eq? soort-alien 'blauw) ((score 'verhoog-score!) 5))
               ((eq? soort-alien 'geel) ((score 'verhoog-score!) 10))
@@ -247,7 +251,7 @@
               
       
     ;; maak-nieuw-spel! : / -> /
-    (define (maak-nieuw-spel! teken-adt)
+    (define (maak-nieuw-spel!)
       (if (and game-over?
                (> game-over-tijd game-over-delay))
           (begin (set! game-over? #f)
@@ -269,7 +273,7 @@
                  ((teken-adt 'teken-levens) raket)
 
                  ; vergelijken met record + huidige resetten
-                 (vergelijk-met-hoogste! teken-adt)
+                 (vergelijk-met-hoogste!)
                  ((score 'reset-score!))
                  ((teken-adt 'teken-huidige-score) score))))
 
@@ -278,22 +282,21 @@
     
 
     ;; update! : number -> /
-    (define (update! tijdsverschil teken-adt)
+    (define (update! tijdsverschil)
       (set! game-over-tijd (+ game-over-tijd tijdsverschil))
       (set! vloot-tijd (+ vloot-tijd tijdsverschil))
       (set! kogel-tijd (+ kogel-tijd tijdsverschil))
       (set! power-up-tijd (+ power-up-tijd tijdsverschil))
       (set! alien-schiettijd (+ alien-schiettijd tijdsverschil))
-      (maak-nieuw-spel! teken-adt)
+      (maak-nieuw-spel!)
       ; Zolang niet game-over? blijf dit doen...
       (if (not game-over?)
           (begin (beweeg-vloot!)
                  (beweeg-kogels!)
                  (beweeg-power-up!)
-                 (bepaal-power-up!)
                  (schiet-alienkogel!)
-                 (check-kogels-geraakt teken-adt)
-                 (check-power-up-geraakt teken-adt)
+                 (check-kogels-geraakt)
+                 (check-power-up-geraakt)
                  (check-vloot!))))
     
     

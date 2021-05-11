@@ -86,8 +86,7 @@
       (voor-alle-schepen (lambda (alien) (if (eq? alien alienschip-adt)
                                              (begin
                                                (((alien 'positie) 'y!) y-buiten-speelveld)
-                                               ((alien 'zet-inactief!))
-                                               (set! aantal-vernietigde-schepen (+ aantal-vernietigde-schepen 1)))))))
+                                               ((alien 'zet-inactief!)))))))
     
 
     ; switch! : / -> /
@@ -128,6 +127,31 @@
           (else (voor-alle-schepen roep-beweeg-op)))))
 
 
+    ; zet-vloot-terug! : / -> /
+    (define (zet-vloot-terug!)
+      (let outer-loop
+        ((outer-idx 0))
+        (if (< outer-idx size)
+            (let inner-loop
+              ((inner-idx 0)
+               (inner-vector (vector-ref schepen outer-idx)))
+              ; omgevingsmodel laat ons niet toe dit in de named-let te zetten
+              ; dan zouden we een soort van named-let* nodig moeten hebben...
+              (define alien (vector-ref inner-vector inner-idx))
+              (if (eq? (alien 'status) 'actief)
+                  (begin (((alien 'positie) 'x!) (afstand-tussen-kolommen (+ inner-idx 1)))
+                         (((alien 'positie) 'y!) (afstand-tussen-rijen outer-idx))))
+              (if (< (+ inner-idx 1) aantal-aliens-per-rij)
+                  (inner-loop (+ inner-idx 1) inner-vector)
+                  (outer-loop (+ outer-idx 1)))))))
+        
+      
+
+    ; verhoog-vernietigde-schepen! : / -> /
+    (define (verhoog-vernietigde-schepen!)
+      (set! aantal-vernietigde-schepen
+            (+ aantal-vernietigde-schepen 1)))
+
     ; roep-beweeg-op : alienschip-adt -> /
     (define (roep-beweeg-op schip-adt)
       ((schip-adt 'beweeg!) richting))
@@ -150,9 +174,11 @@
       (cond ((eq? msg 'beweeg) beweeg!)
             ((eq? msg 'schepen) schepen)
             ((eq? msg 'aantal-vernietigde-schepen) aantal-vernietigde-schepen)
+            ((eq? msg 'verhoog-vernietigde-schepen!) verhoog-vernietigde-schepen!)
             ((eq? msg 'verwijder-schip!) verwijder-schip!)
             ((eq? msg 'voor-alle-schepen) voor-alle-schepen)
             ((eq? msg 'vul-vloot!) vul-vloot!)
+            ((eq? msg 'zet-vloot-terug!) zet-vloot-terug!)
             ((eq? msg 'onderkant-geraakt?) onderkant-geraakt?)
             ((eq? msg 'vloot-vernietigd?) vloot-vernietigd?)
             ((eq? msg 'reset-onderkant-geraakt!) reset-onderkant-geraakt!)

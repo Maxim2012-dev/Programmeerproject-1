@@ -1,7 +1,7 @@
 
 (load "positie-adt.rkt")
 (load "score-adt.rkt")
-(load "raket-adt.rkt")
+(load "raket-adt.rkt") 
 (load "alienschip-adt.rkt")
 (load "alienvloot-adt.rkt")
 (load "teken-adt.rkt")
