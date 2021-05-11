@@ -18,6 +18,8 @@
     (define raket-laag (scherm 'make-layer))
     (define raket-tile
       (make-bitmap-tile "afbeeldingen/raket.png"))
+    (define raket-schild-tile
+      (make-bitmap-tile "afbeeldingen/raket-schild.png"))
     ((raket-laag 'add-drawable) raket-tile)
 
     ; Alienlaag 
@@ -129,9 +131,8 @@
     ;; neem-power-up! : / -> /
     (define (neem-power-up!)
       (if (not power-up-tile)
-          (let ((nieuwe-tile (make-bitmap-tile "afbeeldingen/power-up.png")))
-            (set! power-up-tile nieuwe-tile)
-            ((kogel-laag 'add-drawable) nieuwe-tile))))
+          (begin (set! power-up-tile (make-bitmap-tile "afbeeldingen/power-up.png"))
+                  ((kogel-laag 'add-drawable) power-up-tile))))
     
 
 
@@ -156,8 +157,12 @@
     ;; Raket
     ;; teken-raket! : Raket -> /
     (define (teken-raket! raket-adt)
-      (if raket-adt
-          (teken-object! raket-adt raket-tile)))
+      (teken-object! raket-adt raket-tile))
+
+    (define (teken-raket-schild!)
+      ((raket-laag 'remove-drawable) raket-tile)
+      (set! raket-tile (make-bitmap-tile "afbeeldingen/raket-schild.png"))
+      ((raket-laag 'add-drawable) raket-tile))
 
     ;; Spel
     ;; teken-spel! : Spel -> /
@@ -170,7 +175,8 @@
       (teken-raket! (level-adt 'raket))
       (teken-vloot! (level-adt 'alienvloot))
       (teken-kogels! (level-adt 'kogels))
-      (teken-power-up! (level-adt 'power-up)))
+      (teken-power-up! (level-adt 'power-up)
+                       (level-adt 'power-up-trigger)))
 
     ;; Alienschip
     ;; teken-alienschip! : Alienschip -> /
@@ -203,8 +209,9 @@
 
     ;; Power-Up
     ;; teken-power-up
-    (define (teken-power-up! power-up)
-      (if power-up
+    (define (teken-power-up! power-up trigger)
+      (if (and power-up
+               (not trigger))
           (begin (neem-power-up!)
                  (teken-object! power-up power-up-tile))))
 
@@ -254,6 +261,9 @@
     (define (verwijder-power-up! power-up)
       ((kogel-laag 'remove-drawable) power-up-tile)
       (set! power-up-tile #f))
+
+    (define (verwijder-power-up-image!)
+      ((kogel-laag 'remove-drawable) power-up-image-tile))
     
 
     ;; --------------- CALLBACKS INSTELLEN ---------------
@@ -275,6 +285,9 @@
             ((eq? msg 'teken-huidige-score) teken-huidige-score)
             ((eq? msg 'teken-hoogste-score) teken-hoogste-score)
             ((eq? msg 'teken-levens) teken-levens)
+            ((eq? msg 'teken-power-up-image) teken-power-up-image)
+            ((eq? msg 'teken-raket-schild!) teken-raket-schild!)
+            ((eq? msg 'verwijder-power-up-image!) verwijder-power-up-image!)
             ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
             ((eq? msg 'verwijder-vloot!) verwijder-vloot!)
             ((eq? msg 'verwijder-power-up!) verwijder-power-up!)

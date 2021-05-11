@@ -169,7 +169,11 @@
     (define (activeer-power-up! toets)
       (if (and power-up-trigger
                (eq? toets '#\tab))
-          (roep-power-up-op!)))
+          (begin
+            (zet-schild-aan!)
+            ((teken-adt 'verwijder-power-up-image!))
+            (set! power-up-trigger #f)
+            (set! power-up #f))))
     
 
     ; Bepalen welke procedure moet aangeroepen worden om zo de juiste power-up te activeren
@@ -183,12 +187,14 @@
 
     ; Checken wanneer de power-up de raket raakt
     (define (check-power-up-geraakt)
-      (if power-up
+      (if (and power-up
+               (not power-up-trigger))
           (let* ((raket-pos (raket 'positie))
                  (gelijk? ((raket-pos 'gelijk?) (power-up 'positie))))
             (if gelijk?
                 (begin (set! power-up-trigger #t)
-                       ((teken-adt 'verwijder-power-up!) power-up))))))
+                       ((teken-adt 'verwijder-power-up!) power-up)
+                       ((teken-adt 'teken-power-up-image)))))))
 
     ;; ----------> Activatieprocedures <----------
             
@@ -199,6 +205,10 @@
 
     (define (zet-vloot-terug!)
       ((alienvloot 'zet-vloot-terug!)))
+
+    (define (zet-schild-aan!)
+      ((raket 'zet-schild-aan!))
+      ((teken-adt 'teken-raket-schild!)))
     
 
     ;; --------------- SCORE - OPERATIES ---------------
@@ -321,6 +331,7 @@
             ((eq? msg 'raket) raket)
             ((eq? msg 'kogels) kogels)
             ((eq? msg 'power-up) power-up)
+            ((eq? msg 'power-up-trigger) power-up-trigger)
             ((eq? msg 'alienvloot) alienvloot)
             (else (display "ongeldige boodschap"))))
 
