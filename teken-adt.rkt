@@ -27,7 +27,12 @@
     ; Kogel / Power-Up-laag en tiles-lijst
     (define kogel-laag (scherm 'make-layer))
     (define kogel-tiles '())
+    
     (define power-up-tile #f)
+    (define power-up-image-tile (make-bitmap-tile "afbeeldingen/power-up-image.png"))
+
+    ((power-up-image-tile 'set-x!) power-up-img-x)
+    ((power-up-image-tile 'set-y!) power-up-img-y)
 
     ; Score / Levenslaag en tiles
     (define score-levenslaag (scherm 'make-layer))
@@ -184,6 +189,7 @@
       (let ((tile (neem-kogel kogel)))
         (teken-object! kogel tile)))
 
+    ;; Kogel
     ;; teken-kogels! : list -> /
     (define (teken-kogels! kogels-lijst)
       ((kogels-lijst 'voor-alle-kogels) teken-kogel!))
@@ -202,76 +208,80 @@
           (begin (neem-power-up!)
                  (teken-object! power-up power-up-tile))))
 
-      ;; huidige score
-      ;; teken-huidige-score! : Score -> /
-      (define (teken-huidige-score score)
-        (let* ((huidige-score (score 'huidige-score))
-               (score-tekst (number->string huidige-score)))
-          (punten-tile 'clear)
-          (if (< huidige-score 100)
-              ((punten-tile 'draw-text) (string-append "0" score-tekst) 20 5 5 "white")
-              ((punten-tile 'draw-text) score-tekst 20 5 5 "white"))))
+    ;; Power-Up
+    ;; teken-power-up-image
+    (define (teken-power-up-image)
+      ((kogel-laag 'add-drawable) power-up-image-tile))
 
-      ;; hoogste score
-      ;; teken-hoogste-score! : 
-      (define (teken-hoogste-score score)
-        (let* ((hoogste-score (score 'hoogste-score))
-               (score-tekst (number->string hoogste-score)))
-          (record-punten-tile 'clear)
-          (if (< hoogste-score 100)
-              ((record-punten-tile 'draw-text) (string-append "0" score-tekst) 20 5 5 "white")
-              ((record-punten-tile 'draw-text) score-tekst 20 5 5 "white"))))
+    ;; huidige score
+    ;; teken-huidige-score! : Score -> /
+    (define (teken-huidige-score score)
+      (let* ((huidige-score (score 'huidige-score))
+             (score-tekst (number->string huidige-score)))
+        (punten-tile 'clear)
+        (if (< huidige-score 100)
+            ((punten-tile 'draw-text) (string-append "0" score-tekst) 20 5 5 "white")
+            ((punten-tile 'draw-text) score-tekst 20 5 5 "white"))))
 
-      ;; ---------------> Verwijderen <---------------
+    ;; hoogste score
+    ;; teken-hoogste-score! : 
+    (define (teken-hoogste-score score)
+      (let* ((hoogste-score (score 'hoogste-score))
+             (score-tekst (number->string hoogste-score)))
+        (record-punten-tile 'clear)
+        (if (< hoogste-score 100)
+            ((record-punten-tile 'draw-text) (string-append "0" score-tekst) 20 5 5 "white")
+            ((record-punten-tile 'draw-text) score-tekst 20 5 5 "white"))))
+
+    ;; ---------------> Verwijderen <---------------
 
     
-      ;; verwijder-kogel! : Kogel -> /
-      (define (verwijder-kogel! kogel-adt)
-        (let ((tile (neem-kogel kogel-adt)))
-          ((kogel-laag 'remove-drawable) tile)))
+    ;; verwijder-kogel! : Kogel -> /
+    (define (verwijder-kogel! kogel-adt)
+      (let ((tile (neem-kogel kogel-adt)))
+        ((kogel-laag 'remove-drawable) tile)))
 
-      ;; verwijder-vloot! : Alienvloot -> /
-      (define (verwijder-vloot! alienvloot)
-        ((alienvloot 'voor-alle-schepen) verwijder-alien!))
+    ;; verwijder-vloot! : Alienvloot -> /
+    (define (verwijder-vloot! alienvloot)
+      ((alienvloot 'voor-alle-schepen) verwijder-alien!))
 
-      ;; verwijder-alien! : Alien -> /
-      (define (verwijder-alien! alien)
-        (let ((tile (neem-alienschip alien)))
-          ((alien-laag 'remove-drawable) tile)))
+    ;; verwijder-alien! : Alien -> /
+    (define (verwijder-alien! alien)
+      (let ((tile (neem-alienschip alien)))
+        ((alien-laag 'remove-drawable) tile)))
 
-      ;; verwijder-power-up! : Power-Up -> /
-      (define (verwijder-power-up! power-up)
-        ((kogel-laag 'remove-drawable) power-up-tile)
-        (set! power-up-tile #f))
+    ;; verwijder-power-up! : Power-Up -> /
+    (define (verwijder-power-up! power-up)
+      ((kogel-laag 'remove-drawable) power-up-tile)
+      (set! power-up-tile #f))
     
 
-      ;; --------------- CALLBACKS INSTELLEN ---------------
+    ;; --------------- CALLBACKS INSTELLEN ---------------
 
-      ;; set-spel-lus-functie! : (number -> /) -> /
-      (define (set-spel-lus-functie! func)
-        ((scherm 'set-update-callback!) func))
+    ;; set-spel-lus-functie! : (number -> /) -> /
+    (define (set-spel-lus-functie! func)
+      ((scherm 'set-update-callback!) func))
 
-      ;; set-toets-functie! : (symbol, any -> /) -> /
-      (define (set-toets-functie! func)
-        ((scherm 'set-key-callback!) func))
-
-
-      ;; Dispatch
-      (define (dispatch-teken msg)
-        (cond ((eq? msg 'set-toets-functie!) set-toets-functie!)
-              ((eq? msg 'set-spel-lus-functie!) set-spel-lus-functie!)
-              ((eq? msg 'teken-spel!) teken-spel!)
-              ((eq? msg 'teken-huidige-score) teken-huidige-score)
-              ((eq? msg 'teken-hoogste-score) teken-hoogste-score)
-              ((eq? msg 'teken-levens) teken-levens)
-              ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
-              ((eq? msg 'verwijder-vloot!) verwijder-vloot!)
-              ((eq? msg 'verwijder-power-up!) verwijder-power-up!)
-              (else (display "geen geldige boodschap"))))
-
-      dispatch-teken))
+    ;; set-toets-functie! : (symbol, any -> /) -> /
+    (define (set-toets-functie! func)
+      ((scherm 'set-key-callback!) func))
 
 
+    ;; Dispatch
+    (define (dispatch-teken msg)
+      (cond ((eq? msg 'set-toets-functie!) set-toets-functie!)
+            ((eq? msg 'set-spel-lus-functie!) set-spel-lus-functie!)
+            ((eq? msg 'teken-spel!) teken-spel!)
+            ((eq? msg 'teken-huidige-score) teken-huidige-score)
+            ((eq? msg 'teken-hoogste-score) teken-hoogste-score)
+            ((eq? msg 'teken-levens) teken-levens)
+            ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
+            ((eq? msg 'verwijder-vloot!) verwijder-vloot!)
+            ((eq? msg 'verwijder-power-up!) verwijder-power-up!)
+            (else (display "geen geldige boodschap"))))
+
+    dispatch-teken))
 
 
-  
+
+

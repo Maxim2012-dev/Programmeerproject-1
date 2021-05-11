@@ -19,6 +19,7 @@
          (power-up #f)
          (power-up-tijd 0)
          (power-up-duur 0)
+         (power-up-trigger #f)
          (vloot-tijd 0)
          (kogel-tijd 0))
 
@@ -162,10 +163,17 @@
              (pos-y ((alien 'positie) 'y)))
         (set! power-up (maak-power-up (maak-positie pos-x pos-y)))
         ((alienvloot 'reset-aantal-vernietigde-schepen!))))
+
+
+    ; activeer-power-up! : symbol -> /
+    (define (activeer-power-up! toets)
+      (if (and power-up-trigger
+               (eq? toets '#\tab))
+          (roep-power-up-op!)))
     
 
     ; Bepalen welke procedure moet aangeroepen worden om zo de juiste power-up te activeren
-    (define (activeer-power-up!)
+    (define (roep-power-up-op!)
       (let ((type (power-up 'type)))
         (cond ((= type 1) (geef-extra-leven!))
               ((= type 2) (zet-vloot-terug!)))))
@@ -179,9 +187,8 @@
           (let* ((raket-pos (raket 'positie))
                  (gelijk? ((raket-pos 'gelijk?) (power-up 'positie))))
             (if gelijk?
-                (begin (zet-vloot-terug!)
-                       ((teken-adt 'verwijder-power-up!) power-up)
-                       (set! power-up #f))))))
+                (begin (set! power-up-trigger #t)
+                       ((teken-adt 'verwijder-power-up!) power-up))))))
 
     ;; ----------> Activatieprocedures <----------
             
@@ -256,7 +263,6 @@
                (> game-over-tijd game-over-delay))
           (begin (set! game-over? #f)
 
-                 (display "game")
                  ; alle elementen resetten (vloot, levens, raket en score)
 
                  ; positie van raket op startpositie
@@ -304,7 +310,8 @@
     (define (toets! toets)
       (if (not game-over?)
           (begin (beweeg-raket! toets)
-                 (schiet-raketkogel! toets))))
+                 (schiet-raketkogel! toets)
+                 (activeer-power-up! toets))))
     
     
     ; Dispatch
