@@ -172,7 +172,7 @@
           (begin
             (toggle-schild!)
             ((teken-adt 'verwijder-power-up-image!))
-            (display power-up)
+            ;(display power-up)
             ((power-up 'toggle-actief!))
             (set! power-up-duur 0)
             (set! power-up-trigger #f))))
@@ -187,7 +187,7 @@
 
     ; Checken wanneer tijdsgebonden power-ups moeten worden uitgezet
     (define (check-power-up-duur)
-      (if (and (power-up 'tijdsgebonden)
+      (if (and (power-up 'tijdsgebonden?)
                (>= power-up-duur power-up-looptijd))
           (let ((type (power-up 'type)))
             (toggle-schild!))))
