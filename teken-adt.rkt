@@ -181,7 +181,7 @@
       (teken-vloot! (level-adt 'alienvloot))
       (teken-kogels! (level-adt 'kogels))
       (teken-power-up! (level-adt 'power-up)
-                       (level-adt 'power-up-trigger)))
+                       (level-adt 'power-up-in-bezit?)))
 
     ;; Alienschip
     ;; teken-alienschip! : Alienschip -> /

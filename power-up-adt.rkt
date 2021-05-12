@@ -12,9 +12,7 @@
     (let* ((vec-size (vector-length power-up-types))
           (nieuw-type (vector-ref power-up-types (random-integer vec-size))))
       (set! type nieuw-type)
-      (cond ((= type 3)
-             (set! tijdsgebonden #t)
-             (set! looptijd power-up-looptijd))))
+      (set! tijdsgebonden? #t))
           
 
     ; Een power-up beweegt in elk geval omlaag richting de raket

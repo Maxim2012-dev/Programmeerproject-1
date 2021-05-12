@@ -26,7 +26,6 @@
     (define (dispatch-kogel msg)
       (cond ((eq? msg 'positie) positie)
             ((eq? msg 'beweeg!) beweeg!)
-            ((eq? msg 'toggle-type!) toggle-type!)
             ((eq? msg 'stop) stop)
             ((eq? msg 'type) type)
             (else (display "ongeldige boodschap - kogel"))))
