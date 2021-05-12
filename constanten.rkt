@@ -42,6 +42,7 @@
 (define power-up-types (vector 1 2 3 4 5))
 (define power-up-img-x (- venster-breedte-px 80))
 (define power-up-img-y 15)
+(define power-up-looptijd 5000)
 
 (define delay-alienschot 3000)
 (define game-over-delay 5000)

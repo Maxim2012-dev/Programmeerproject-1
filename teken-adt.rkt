@@ -18,8 +18,6 @@
     (define raket-laag (scherm 'make-layer))
     (define raket-tile
       (make-bitmap-tile "afbeeldingen/raket.png"))
-    (define raket-schild-tile
-      (make-bitmap-tile "afbeeldingen/raket-schild.png"))
     ((raket-laag 'add-drawable) raket-tile)
 
     ; Alienlaag 
@@ -156,13 +154,20 @@
     
     ;; Raket
     ;; teken-raket! : Raket -> /
-    (define (teken-raket! raket-adt)
-      (teken-object! raket-adt raket-tile))
+    (define (teken-raket! raket)
+      (teken-object! raket raket-tile))
 
-    (define (teken-raket-schild!)
-      ((raket-laag 'remove-drawable) raket-tile)
-      (set! raket-tile (make-bitmap-tile "afbeeldingen/raket-schild.png"))
-      ((raket-laag 'add-drawable) raket-tile))
+    ;; Raket
+    ;; toggle-raket-schild! : Raket -> /
+    (define (toggle-raket-schild! raket)
+      (if (raket 'schild?)
+          (begin ((raket-laag 'remove-drawable) raket-tile)
+                 (set! raket-tile (make-bitmap-tile "afbeeldingen/raket-schild.png"))
+                 ((raket-laag 'add-drawable) raket-tile))
+          (begin
+            ((raket-laag 'remove-drawable) raket-tile)
+            (set! raket-tile (make-bitmap-tile "afbeeldingen/raket.png"))
+            ((raket-laag 'add-drawable) raket-tile))))
 
     ;; Spel
     ;; teken-spel! : Spel -> /
@@ -286,7 +291,7 @@
             ((eq? msg 'teken-hoogste-score) teken-hoogste-score)
             ((eq? msg 'teken-levens) teken-levens)
             ((eq? msg 'teken-power-up-image) teken-power-up-image)
-            ((eq? msg 'teken-raket-schild!) teken-raket-schild!)
+            ((eq? msg 'toggle-raket-schild!) toggle-raket-schild!)
             ((eq? msg 'verwijder-power-up-image!) verwijder-power-up-image!)
             ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
             ((eq? msg 'verwijder-vloot!) verwijder-vloot!)

@@ -164,23 +164,33 @@
         (set! power-up (maak-power-up (maak-positie pos-x pos-y)))
         ((alienvloot 'reset-aantal-vernietigde-schepen!))))
 
-
+    ; Wanneer op de tab-toets wordt gedrukt
     ; activeer-power-up! : symbol -> /
     (define (activeer-power-up! toets)
       (if (and power-up-trigger
                (eq? toets '#\tab))
           (begin
-            (zet-schild-aan!)
+            (toggle-schild!)
             ((teken-adt 'verwijder-power-up-image!))
-            (set! power-up-trigger #f)
-            (set! power-up #f))))
+            (display power-up)
+            ((power-up 'toggle-actief!))
+            (set! power-up-duur 0)
+            (set! power-up-trigger #f))))
     
 
     ; Bepalen welke procedure moet aangeroepen worden om zo de juiste power-up te activeren
     (define (roep-power-up-op!)
       (let ((type (power-up 'type)))
         (cond ((= type 1) (geef-extra-leven!))
-              ((= type 2) (zet-vloot-terug!)))))
+              ((= type 2) (zet-vloot-terug!))
+              ((= type 3) (toggle-schild!)))))
+
+    ; Checken wanneer tijdsgebonden power-ups moeten worden uitgezet
+    (define (check-power-up-duur)
+      (if (and (power-up 'tijdsgebonden)
+               (>= power-up-duur power-up-looptijd))
+          (let ((type (power-up 'type)))
+            (toggle-schild!))))
     
 
     ;; ----------> Raket-geraakt? <----------
@@ -188,7 +198,8 @@
     ; Checken wanneer de power-up de raket raakt
     (define (check-power-up-geraakt)
       (if (and power-up
-               (not power-up-trigger))
+               (not power-up-trigger)
+               (not (power-up 'actief?)))
           (let* ((raket-pos (raket 'positie))
                  (gelijk? ((raket-pos 'gelijk?) (power-up 'positie))))
             (if gelijk?
@@ -197,18 +208,21 @@
                        ((teken-adt 'teken-power-up-image)))))))
 
     ;; ----------> Activatieprocedures <----------
-            
+
+    ; type 1
     ; Voor elke power-up een procedure die hem gaat activeren
     (define (geef-extra-leven!)
       ((raket 'voeg-leven-toe!))
       ((teken-adt 'teken-levens) raket))
 
+    ; type 2
     (define (zet-vloot-terug!)
       ((alienvloot 'zet-vloot-terug!)))
 
-    (define (zet-schild-aan!)
-      ((raket 'zet-schild-aan!))
-      ((teken-adt 'teken-raket-schild!)))
+    ; type 3
+    (define (toggle-schild!)
+      ((raket 'toggle-schild!))
+      ((teken-adt 'toggle-raket-schild!) raket))
     
 
     ;; --------------- SCORE - OPERATIES ---------------
@@ -304,6 +318,7 @@
       (set! kogel-tijd (+ kogel-tijd tijdsverschil))
       (set! power-up-tijd (+ power-up-tijd tijdsverschil))
       (set! alien-schiettijd (+ alien-schiettijd tijdsverschil))
+      (set! power-up-duur (+ power-up-duur tijdsverschil))
       (maak-nieuw-spel!)
       ; Zolang niet game-over? blijf dit doen...
       (if (not game-over?)
@@ -313,7 +328,10 @@
                  (schiet-alienkogel!)
                  (check-kogels-geraakt)
                  (check-power-up-geraakt)
-                 (check-vloot!))))
+                 (check-vloot!)))
+      ; Als er een power-up is + actief is...
+      (if (and power-up (power-up 'actief?))
+          (check-power-up-duur)))
     
     
     ;; toets! : any -> /

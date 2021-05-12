@@ -40,13 +40,11 @@
   (define (voeg-leven-toe!)
     (set! levens (+ levens 1)))
 
-  ; zet-schild-aan! : / -> /
-  (define (zet-schild-aan!)
-    (set! schild? #t))
-
-  ; reset-schild! :  / -> /
-  (define (reset-schild!)
-    (set! schild? #f))
+  ; toggle-schild! : / -> /
+  (define (toggle-schild!)
+    (if schild?
+        (set! schild? #f)
+        (set! schild? #t)))
 
   ; reset-levens! : /> /
   (define (reset-levens!)
@@ -62,8 +60,7 @@
          ((eq? msg 'schild?) schild?)
          ((eq? msg 'verminder-levens!) verminder-levens!)
          ((eq? msg 'voeg-leven-toe!) voeg-leven-toe!)
-         ((eq? msg 'zet-schild-aan!) zet-schild-aan!)
-         ((eq? msg 'reset-schild!) reset-schild!)
+         ((eq? msg 'toggle-schild!) toggle-schild!)
          ((eq? msg 'reset-levens!) reset-levens!)
          (else (display "ongeldige boodschap - raket"))))
   dispatch-raket))
