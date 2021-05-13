@@ -84,6 +84,16 @@
           (let ((nieuwe_kogel (maak-kogel (maak-positie ((raket 'positie) 'x)
                                                         ((raket 'positie) 'y))
                                           'raket)))
+            (if (raket 'upgrade?)
+                ; twee extra kogels maken voor de power-up
+                (begin ((kogels 'voeg-kogel-toe!)
+                        (maak-kogel (maak-positie (- ((raket 'positie) 'x) 1)
+                                                  ((raket 'positie) 'y))
+                                    'raket))
+                       ((kogels 'voeg-kogel-toe!)
+                       (maak-kogel (maak-positie (+ ((raket 'positie) 'x) 1)
+                                                 ((raket 'positie) 'y))
+                                   'raket))))
             ((kogels 'voeg-kogel-toe!) nieuwe_kogel))))
 
     
@@ -173,7 +183,7 @@
       (if (and power-up-in-bezit?
                (eq? toets '#\tab))
           (begin
-            (toggle-schild!)
+            (toggle-upgrade!)
             ((teken-adt 'verwijder-power-up-image!))
             ((power-up 'toggle-actief!))
             (display (power-up 'actief?))
@@ -188,11 +198,12 @@
               ((= type 3) (toggle-schild!)))))
 
     ; Checken wanneer tijdsgebonden power-ups moeten worden uitgezet
-    (define (check-power-up-duur)
+    (define (check-power-up-einde!)
       (if (and (power-up 'tijdsgebonden?)
                (>= power-up-duur power-up-looptijd))
           (let ((type (power-up 'type)))
-            (toggle-schild!)
+            (display "einde")
+            (toggle-upgrade!)
             (set! power-up #f))))
     
 
@@ -226,6 +237,10 @@
     (define (toggle-schild!)
       ((raket 'toggle-schild!))
       ((teken-adt 'toggle-raket-schild!) raket))
+
+    ; type 4
+    (define (toggle-upgrade!)
+      ((raket 'toggle-upgrade!)))
     
 
     ;; --------------- SCORE - OPERATIES ---------------
@@ -334,7 +349,7 @@
                  (check-vloot!)))
       ; Als er een power-up is + actief is...
       (if (and power-up (power-up 'actief?))
-          (check-power-up-duur)))
+          (check-power-up-einde!)))
     
     
     ;; toets! : any -> /

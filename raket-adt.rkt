@@ -7,7 +7,8 @@
 ; de raket begint altijd op een gegeven positie
 (define (maak-raket positie)
   (let ((levens aantal-levens-raket)
-        (schild? #f))
+        (schild? #f)
+        (upgrade? #f))
 
 
   ; de beweeg! functie die de beweeg van positie gaat aanroepen
@@ -46,6 +47,12 @@
         (set! schild? #f)
         (set! schild? #t)))
 
+  ; toggle-3-kogels! : / -> /
+  (define (toggle-upgrade!)
+    (if upgrade?
+        (set! upgrade? #f)
+        (set! upgrade? #t)))
+
   ; reset-levens! : /> /
   (define (reset-levens!)
     (set! levens aantal-levens-raket))
@@ -58,9 +65,11 @@
          ((eq? msg 'schiet!) schiet!)
          ((eq? msg 'levens) levens)
          ((eq? msg 'schild?) schild?)
+         ((eq? msg 'upgrade?) upgrade?)
          ((eq? msg 'verminder-levens!) verminder-levens!)
          ((eq? msg 'voeg-leven-toe!) voeg-leven-toe!)
          ((eq? msg 'toggle-schild!) toggle-schild!)
+         ((eq? msg 'toggle-upgrade!) toggle-upgrade!)
          ((eq? msg 'reset-levens!) reset-levens!)
          (else (display "ongeldige boodschap - raket"))))
   dispatch-raket))
