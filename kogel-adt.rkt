@@ -12,9 +12,6 @@
             ((eq? type 'alien)
              ((positie 'beweeg!) 'omlaag))))
 
-    ;; stop! : / > /
-    (define (stop)
-      ((positie 'beweeg!) 'stop))
 
     ;; toggle-type : / -> /
     (define (toggle-type!)

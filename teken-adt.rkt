@@ -249,8 +249,8 @@
 
     
     ;; verwijder-kogel! : Kogel -> /
-    (define (verwijder-kogel! kogel-adt)
-      (let ((tile (neem-kogel kogel-adt)))
+    (define (verwijder-kogel! kogel)
+      (let ((tile (neem-kogel kogel)))
         ((kogel-laag 'remove-drawable) tile)))
 
     ;; verwijder-vloot! : Alienvloot -> /

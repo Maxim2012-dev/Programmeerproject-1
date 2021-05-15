@@ -29,10 +29,6 @@
   (define (rand-geraakt?)
     ((positie 'rand-horizontaal?)))
 
-  ; positie! : Positie -> /
-  (define (positie! nieuwe_positie)
-    (set! positie nieuwe_positie))
-
   ; verminder-levens! : / -> /
   (define (verminder-levens!)
     (set! levens (- levens 1)))
