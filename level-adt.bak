@@ -124,7 +124,6 @@
                      (raket-kogel? (eq? (kogel 'type) 'raket)))
                 (if raket-kogel?
                     ; Als raket-kogel? dan...
-                    ; ---------------------------------------------------------------------------------------
                     ((alienvloot 'voor-alle-schepen)
                      (lambda (alien)
                        ; kogel van RAKET raakt een alien + alien heeft 1 leven
@@ -136,20 +135,15 @@
                                   (creëer-power-up! alien))
                               (bepaal-score! alien)
                               (verwijder-alienschip! alien)
-                              ; als kogel geen torpedo is...
-                              (if (not (kogel 'torpedo?))
-                                  (begin (verwijder-kogel! kogel)
-                                         ((teken-adt 'verwijder-kogel!) kogel))))
+                              (verwijder-kogel! kogel)
+                              ((teken-adt 'verwijder-kogel!) kogel))
                              ; kogel van RAKET raakt een alien + alien heeft meer dan 1 leven
                              ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
                                    (> (alien 'levens) 1))
                               ((alien 'levens!) (- (alien 'levens) 1))
-                              ; als kogel geen torpedo is...
-                              (if (not (kogel 'torpedo?))
-                                  (begin (verwijder-kogel! kogel)
-                                         ((teken-adt 'verwijder-kogel!) kogel)))))))
+                              (verwijder-kogel! kogel)
+                              ((teken-adt 'verwijder-kogel!) kogel)))))
                     ; Anders doe dit...
-                    ; ---------------------------------------------------------------------------------------
                     ; kogel van ALIEN raakt de raket + raket heeft 1 leven
                     (cond ((and (((raket 'positie) 'gelijk?) (kogel 'positie))
                                 (= (raket 'levens) 1))
@@ -189,9 +183,10 @@
       (if (and power-up-in-bezit?
                (eq? toets '#\tab))
           (begin
-            (schiet-torpedo!)
+            (toggle-upgrade!)
             ((teken-adt 'verwijder-power-up-image!))
             ((power-up 'toggle-actief!))
+            (display (power-up 'actief?))
             (set! power-up-duur 0))))
     
 
@@ -200,9 +195,7 @@
       (let ((type (power-up 'type)))
         (cond ((= type 1) (geef-extra-leven!))
               ((= type 2) (zet-vloot-terug!))
-              ((= type 3) (toggle-schild!))
-              ((= type 4) (toggle-upgrade!))
-              ((= type 5) (schiet-torpedo!)))))
+              ((= type 3) (toggle-schild!)))))
 
     ; Checken wanneer tijdsgebonden power-ups moeten worden uitgezet
     (define (check-power-up-einde!)
@@ -210,7 +203,7 @@
                (>= power-up-duur power-up-looptijd))
           (let ((type (power-up 'type)))
             (display "einde")
-            (schiet-torpedo!)
+            (toggle-upgrade!)
             (set! power-up #f))))
     
 
@@ -248,15 +241,6 @@
     ; type 4
     (define (toggle-upgrade!)
       ((raket 'toggle-upgrade!)))
-
-    ; type 5
-    (define (schiet-torpedo!)
-      (let ((nieuwe_kogel (maak-kogel (maak-positie ((raket 'positie) 'x)
-                                                    ((raket 'positie) 'y))
-                                          'raket)))
-        ((nieuwe_kogel 'toggle-torpedo!))
-        ((kogels 'voeg-kogel-toe!) nieuwe_kogel)))
-        
     
 
     ;; --------------- SCORE - OPERATIES ---------------
