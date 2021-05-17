@@ -114,8 +114,8 @@
 
     ;; Dit is de procedure die constant checkt of één van de kogels
     ;; ofwel een alien ofwel de raket raakt.
-    ;; check-kogels-geraakt : / -> /
-    (define (check-kogels-geraakt)
+    ;; check-kogels-geraakt! : / -> /
+    (define (check-kogels-geraakt!)
       (let ((kogels-lijst (kogels 'kogels-lijst)))
         ; itereren over alle kogels
         (define (iter kogels-lijst)
@@ -217,7 +217,7 @@
     ;; ----------> Raket-geraakt? <----------
 
     ; Checken wanneer de power-up de raket raakt
-    (define (check-power-up-geraakt)
+    (define (check-power-up-geraakt!)
       (if (and power-up
                (not power-up-in-bezit?)
                (not (power-up 'actief?)))
@@ -360,8 +360,8 @@
                  (beweeg-kogels!)
                  (beweeg-power-up!)
                  (schiet-alienkogel!)
-                 (check-kogels-geraakt)
-                 (check-power-up-geraakt)
+                 (check-kogels-geraakt!)
+                 (check-power-up-geraakt!)
                  (check-vloot!)))
       ; Als er een power-up is + actief is...
       (if (and power-up (power-up 'actief?))
