@@ -61,7 +61,9 @@
             (if (not raakt-rand?)
                 (begin ((power-up 'beweeg!))
                        (set! power-up-tijd 0))
-                (set! power-up #f)))))
+                (begin
+                  ((teken-adt 'verwijder-power-up!) power-up)
+                  (set! power-up #f))))))
 
 
     ;; roep-beweeg-op : kogel-adt -> /
@@ -132,6 +134,7 @@
                                    (= (alien 'levens) 1))
                               ((alienvloot 'verhoog-vernietigde-schepen!))
                               ; checken voor power-up
+                              (display (alienvloot 'aantal-vernietigde-schepen))(newline)
                               (if (= (alienvloot 'aantal-vernietigde-schepen) aliens-power-up)
                                   (creëer-power-up! alien))
                               (bepaal-score! alien)
@@ -180,37 +183,42 @@
     (define (creëer-power-up! alien)
       (let* ((pos-x ((alien 'positie) 'x))
              (pos-y ((alien 'positie) 'y)))
-        (set! power-up (maak-power-up (maak-positie pos-x pos-y)))
-        ((alienvloot 'reset-aantal-vernietigde-schepen!))))
+        (set! power-up (maak-power-up (maak-positie pos-x pos-y)))))
 
-    ; Wanneer op de tab-toets wordt gedrukt
+    ; Wanneer op de tab-toets wordt gedrukt als je een power-up in bezit hebt.
     ; activeer-power-up! : symbol -> /
     (define (activeer-power-up! toets)
       (if (and power-up-in-bezit?
                (eq? toets '#\tab))
           (begin
-            (schiet-torpedo!)
             ((teken-adt 'verwijder-power-up-image!))
             ((power-up 'toggle-actief!))
+            ((alienvloot 'reset-aantal-vernietigde-schepen!))
+            (roep-power-up-op!)
             (set! power-up-duur 0))))
     
 
     ; Bepalen welke procedure moet aangeroepen worden om zo de juiste power-up te activeren
     (define (roep-power-up-op!)
       (let ((type (power-up 'type)))
+        (display "roep-op") 
         (cond ((= type 1) (geef-extra-leven!))
               ((= type 2) (zet-vloot-terug!))
               ((= type 3) (toggle-schild!))
               ((= type 4) (toggle-upgrade!))
-              ((= type 5) (schiet-torpedo!)))))
+              ((= type 5) (schiet-torpedo!))
+              (else (display "procedure voor dit type bestaat niet (start)")))))
 
-    ; Checken wanneer tijdsgebonden power-ups moeten worden uitgezet
+    ; Checken wanneer tijdsgebonden power-ups moeten worden uitgezet.
+    ; Wordt enkel opgeroepen wanneer tijdsgebonden power-ups actief zijn.
     (define (check-power-up-einde!)
       (if (and (power-up 'tijdsgebonden?)
-               (>= power-up-duur power-up-looptijd))
+               (>= power-up-duur (power-up 'looptijd)))
           (let ((type (power-up 'type)))
-            (display "einde")
-            (schiet-torpedo!)
+            (cond ((= type 3) (toggle-schild!))
+                  ((= type 4) (toggle-upgrade!))
+                  (else (display "procedure voor dit type bestaat niet (einde)")))
+            (set! power-up-in-bezit? #f)
             (set! power-up #f))))
     
 
@@ -363,7 +371,7 @@
                  (check-kogels-geraakt!)
                  (check-power-up-geraakt!)
                  (check-vloot!)))
-      ; Als er een power-up is + actief is...
+      ; Als er een tijdsgebonden power-up is + actief is...
       (if (and power-up (power-up 'actief?))
           (check-power-up-einde!)))
     

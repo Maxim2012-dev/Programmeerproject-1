@@ -4,7 +4,7 @@
 ;;;;*       >>> Graphics.rkt  <<<      *;;;;
 ;;;;* > Programmeerproject 2020-2021 < *;;;;
 ;;;;*                                  *;;;;
-;;;;*         >>  Versie 3  <<         *;;;;
+;;;;*          >>  Versie 4  <<        *;;;;
 ;;;;*                                  *;;;;
 ;;;;*            Adapted by:           *;;;;
 ;;;;*           Bjarno Oeyen           *;;;;
@@ -206,7 +206,7 @@
                    [interval (calculate-interval) ]
                    [just-once? #t]))))
 
-    (define (adjust-size) ;; Some operating systems do not properly initialise the size of the window, compute a correction, and apply it
+    (define (adjust-size) ;; Some operating systems do not properly initialise the size of the window. This procedure computes a correction, and applies it
       (define-values (size-w size-h) (send frame get-size))
       (define-values (client-size-w client-size-h) (send frame get-client-size))
       ;; (display "user-size: ") (display (list w h)) (newline)
@@ -358,8 +358,14 @@
          (rotated-mask (make-object bitmap% w h #t #f ))
          (rotated-mask-dc (new bitmap-dc% [bitmap rotated-mask]))
          (bitmap-dc (new bitmap-dc%  [bitmap bufferbitmap]))
-         (rotation 0))
-    (send bitmap-dc draw-bitmap bitmap 0 0 )
+         (rotation 0)
+         (dirty #t))
+
+    (define (trigger-update)
+      (set! dirty #t)
+      (update-callback))
+    
+    (send bitmap-dc draw-bitmap bitmap 0 0)
     
     ;; ##### Drawing methods to draw on the tile yourself.
     ;; Clear removed your own drawings. 
@@ -371,8 +377,8 @@
       (set! rotated-mask (make-object bitmap% w h #t #f ))
       (set! rotated-mask-dc (new bitmap-dc% [bitmap rotated-mask]))
       (set! bitmap-dc (new bitmap-dc%  [bitmap bufferbitmap]))
-      (send bitmap-dc draw-bitmap bitmap 0 0 )
-      (update-callback))
+      (send bitmap-dc draw-bitmap bitmap 0 0)
+      (trigger-update))
     
     ;; Drawing a rectangle
     ;; Number, Number, Number, Number, (String ∪ Color%) -> void
@@ -381,7 +387,7 @@
       (send bitmap-dc set-brush color 'solid)
       (send bitmap-dc set-pen color 1 'transparent)
       (send bitmap-dc draw-rectangle x y w h)
-      (update-callback))
+      (trigger-update))
     
     ;; Drawing an Ellipse
     ;; Number, Number, Number, Number, (String ∪ Color%) -> void
@@ -390,7 +396,7 @@
       (send bitmap-dc set-brush color 'solid)
       (send bitmap-dc set-pen color 1 'transparent)
       (send bitmap-dc draw-ellipse x y w h)
-      (update-callback))
+      (trigger-update))
     
     ;; Drawing a Line
     ;; Number, Number, Number, Number, Number, (String ∪ Color%) -> void
@@ -398,7 +404,7 @@
       (when (string? color) (set! color (send the-color-database find-color color)))
       (send bitmap-dc set-pen color width 'solid)
       (send bitmap-dc draw-line x y w h)
-      (update-callback))
+      (trigger-update))
     
     ;; Drawing Text
     ;; String, Number, Number, Number, (String ∪ Color%) -> void
@@ -407,7 +413,7 @@
       (send bitmap-dc set-font (make-object font% fontsize 'default))
       (send bitmap-dc set-text-foreground color)
       (send bitmap-dc draw-text text x y)
-      (update-callback))
+      (trigger-update))
     
     ;; Rotation of 90 degrees clockwise.
     ;; void -> void
@@ -437,29 +443,33 @@
         (define mask-pair (create-rotated-bitmap-and-dc w h r #f))     
         (set! rotated-mask (car mask-pair))     
         (set! rotated-mask-dc (cdr mask-pair)))
-      (update-callback))
+      (trigger-update))
     
     ;; Set the X position on the screen
     ;; Integer -> void
     (define (set-x! new_x)
       (unless (= x new_x)
         (set! x new_x)
-        (update-callback)))
+        (trigger-update)))
     
     ;; Set the Y position on the screen
     ;; Integer -> void
     (define (set-y! new_y)
       (unless (= y new_y)
         (set! y new_y)
-        (update-callback)))
+        (trigger-update)))
     
     (define transparent-color (make-object color% 0 0 0 0))
     
     ;; Drawing procedure called by the layer 
     ;; on which the tile is drawn. This should not be called in a student project!
     ;; dc% -> void
-    (define (draw dc)    
-      (send rotated-bitmap-dc draw-bitmap bufferbitmap 0 0)
+    (define (draw dc)
+      (when dirty
+        (send rotated-bitmap-dc set-background transparent-color)
+        (send rotated-bitmap-dc clear)
+        (send rotated-bitmap-dc draw-bitmap bufferbitmap 0 0)
+        (set! dirty #f))
       (if mask
           (begin (send rotated-mask-dc draw-bitmap mask 0 0)
                  (send dc draw-bitmap rotated-bitmap x y 'solid transparent-color rotated-mask))

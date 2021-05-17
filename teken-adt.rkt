@@ -1,5 +1,5 @@
-+;;           -----------
-*-;;----------  Teken ADT  ----------
+;;           -----------
+;;----------  Teken ADT  ----------
 ;;           -----------
 
 (#%require "Graphics.rkt")
@@ -216,9 +216,9 @@
 
     ;; Power-Up
     ;; teken-power-up
-    (define (teken-power-up! power-up trigger)
+    (define (teken-power-up! power-up in-bezit?)
       (if (and power-up
-               (not trigger))
+               (not in-bezit?))
           (begin (neem-power-up!)
                  (teken-object! power-up power-up-tile))))
 
@@ -266,6 +266,7 @@
 
     ;; verwijder-power-up! : Power-Up -> /
     (define (verwijder-power-up! power-up)
+      (display "verwijderd")
       ((kogel-laag 'remove-drawable) power-up-tile)
       (set! power-up-tile #f))
 

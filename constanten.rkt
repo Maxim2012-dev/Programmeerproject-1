@@ -7,16 +7,18 @@
 (define venster-breedte-px (* cel-breedte-px spel-breedte))
 (define venster-hoogte-px (* cel-hoogte-px spel-hoogte))
 
-(define aantal-rijen-aliens 6)
-(define aantal-aliens-per-rij 3)
+(define aantal-rijen-aliens 5)
+(define aantal-aliens-per-rij 11)
 (define aantal-levens-raket 5)
+
+(define vloot-size aantal-rijen-aliens)
 
 (define snelheid-vloot 1000)
 (define snelheid-kogel 50)
 (define snelheid-power-up 200)
 
 (define raket-start-x 5)
-(define raket-start-y (- spel-hoogte 4))
+(define raket-start-y (- spel-hoogte 2))
 
 (define score-bord-y 5)
 (define score-pos (- (/ venster-breedte-px 2) 170))
@@ -42,7 +44,6 @@
 (define power-up-types (vector 1 2 3 4 5))
 (define power-up-img-x (- venster-breedte-px 80))
 (define power-up-img-y 15)
-(define power-up-looptijd 3000)
 
 (define delay-alienschot 3000)
 (define game-over-delay 5000)

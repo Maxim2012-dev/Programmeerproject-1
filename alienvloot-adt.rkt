@@ -2,22 +2,35 @@
 ;; ----------  Alienvloot ADT  ----------
 ;;            ----------------
 
-(load "matrix.rkt")
 (load "alienschip-adt.rkt")
 (load "positie-adt.rkt")
 (#%require srfi/27)
 
 (define (maak-alienvloot)
-  (let* ((schepen (maak-matrix))
-         (richting 'rechts)
-         (size (vector-length schepen))
-         (aantal-vernietigde-schepen 0)
-         (onderkant-geraakt? #f)
-         (vloot-vernietigd? #f))
+  (let ((schepen #f)
+        (richting 'rechts)
+        (size vloot-size)
+        (aantal-vernietigde-schepen 0)
+        (onderkant-geraakt? #f)
+        (vloot-vernietigd? #f))
+    
 
+    ;; Aanmaken van een matrix-datastructuur
+    ;; zodat we daarin onze alienschepen kunnen plaatsen (vector van vectoren)
+    (define (maak-matrix)
+      (let ((vector (make-vector aantal-rijen-aliens)))
+        (let loop
+          ((huidige-idx 0))
+          (if (< huidige-idx aantal-rijen-aliens)
+              (begin
+                (vector-set! vector huidige-idx (make-vector aantal-aliens-per-rij))
+                (loop (+ huidige-idx 1)))))
+        vector))
 
-    (define (afstand-tussen-rijen idx) (+ 3 idx))
-    (define (afstand-tussen-kolommen idx) (* 2 idx))
+    (set! schepen (maak-matrix))
+    
+
+    (define (afstand-tussen-aliens idx) (* 2 idx))
 
     ; Elke plaats in de vector opvullen met een alienschip object
     (define (vul-vloot! type)
@@ -29,8 +42,8 @@
                (inner-vector (vector-ref schepen outer-idx)))
               ; inner-idx + 1 (vermijden dat x op nul start)
               (define nieuw_alienschip (maak-alienschip (maak-positie
-                                                         (afstand-tussen-kolommen (+ inner-idx 1))
-                                                         (afstand-tussen-rijen outer-idx))))
+                                                         (afstand-tussen-aliens (+ inner-idx 1))
+                                                         (afstand-tussen-aliens (+ outer-idx 2)))))
               ; in het geval van een willekeurig vloot
               (if (eq? type 'willekeurig)
                   (bepaal-willekeurig! nieuw_alienschip))
@@ -139,8 +152,8 @@
               ; dan zouden we een soort van named-let* nodig moeten hebben...
               (define alien (vector-ref inner-vector inner-idx))
               (if (eq? (alien 'status) 'actief)
-                  (begin (((alien 'positie) 'x!) (afstand-tussen-kolommen (+ inner-idx 1)))
-                         (((alien 'positie) 'y!) (afstand-tussen-rijen outer-idx))))
+                  (begin (((alien 'positie) 'x!) (afstand-tussen-aliens (+ inner-idx 1)))
+                         (((alien 'positie) 'y!) (afstand-tussen-aliens (+ outer-idx 2)))))
               (if (< (+ inner-idx 1) aantal-aliens-per-rij)
                   (inner-loop (+ inner-idx 1) inner-vector)
                   (outer-loop (+ outer-idx 1)))))))

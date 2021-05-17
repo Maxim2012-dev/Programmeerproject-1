@@ -109,10 +109,12 @@
 
     ;; voeg-kogel-toe! : Kogel -> tile
     ; maakt een nieuwe tile aan en voegt deze toe aan de laag en geeft deze dan terug
-    (define (voeg-kogel-toe! kogel-adt)
-      (let ((nieuwe-tile
-             (make-bitmap-tile "afbeeldingen/kogel.png" "afbeeldingen/kogel-mask.png")))
-        (set! kogel-tiles (cons (cons kogel-adt nieuwe-tile) kogel-tiles))
+    (define (voeg-kogel-toe! kogel)
+      (let ((nieuwe-tile (if (kogel 'torpedo?)
+                             (begin (display "torpedo-teken")
+                                    (make-bitmap-tile "afbeeldingen/torpedo.png"))
+                             (make-bitmap-tile "afbeeldingen/kogel.png" "afbeeldingen/kogel-mask.png"))))
+        (set! kogel-tiles (cons (cons kogel nieuwe-tile) kogel-tiles))
         ((kogel-laag 'add-drawable) nieuwe-tile)
         nieuwe-tile))
 
@@ -130,7 +132,7 @@
     (define (neem-power-up!)
       (if (not power-up-tile)
           (begin (set! power-up-tile (make-bitmap-tile "afbeeldingen/power-up.png"))
-                  ((kogel-laag 'add-drawable) power-up-tile))))
+                 ((kogel-laag 'add-drawable) power-up-tile))))
     
 
 
