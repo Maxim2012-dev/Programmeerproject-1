@@ -120,7 +120,7 @@
     ;; ofwel een alien ofwel de raket raakt.
     ;; check-kogels-geraakt! : / -> /
     (define (check-kogels-geraakt!)
-      (let ((kogels-lijst (kogels 'kogels-lijst)))
+      (let ((kogels-lijst (cdr (kogels 'kogels-lijst))))
         ; itereren over alle kogels
         (define (iter kogels-lijst)
           (if (not (null? kogels-lijst))
@@ -141,13 +141,13 @@
                               (bepaal-score! alien)
                               (verwijder-alienschip! alien)
                               (if (not (kogel 'torpedo?))
-                                  (verwijder-kogel! kogel))
+                                  (verwijder-kogel! kogel)))
                              ; kogel van RAKET raakt een alien + alien heeft meer dan 1 leven
                              ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
                                    (> (alien 'levens) 1))
                               ((alien 'levens!) (- (alien 'levens) 1))
                               (if (not (kogel 'torpedo?))
-                                  (verwijder-kogel! kogel)))))))
+                                  (verwijder-kogel! kogel))))))
                     ; Anders doe dit...
                     ; ---------------------------------------------------------------------------------------
                     ; kogel van ALIEN raakt de raket + raket heeft 1 leven

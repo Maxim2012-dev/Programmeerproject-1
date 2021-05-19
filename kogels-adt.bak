@@ -1,31 +1,27 @@
 (define (maak-kogels-adt)
-  (let ((kogels-lijst (cons 'kogels '())))
+  (let ((kogels-lijst '()))
 
-    ; headed-list maken
-
-    ; voeg-kogel-toe! : Kogel -> /
-    (define (voeg-kogel-toe! kogel)
-      (set-cdr! kogels-lijst (cons kogel (cdr kogels-lijst)))
-      (display kogels-lijst)(newline))
+    (define (voeg-kogel-toe! kogel-adt)
+      (set! kogels-lijst (cons kogel-adt kogels-lijst)))
 
 
-    ; voor-alle-kogels : <procedure> -> /
     (define (voor-alle-kogels fun)
       (define (iter list)
         (if (not (null? list))
             (begin (fun (car list))
                    (iter (cdr list)))))
-      (iter (cdr kogels-lijst)))
+      (iter kogels-lijst))
 
-    ; verwijder-kogel! : Kogel -> /
-    (define (verwijder-kogel! kogel)
+
+    (define (verwijder-kogel! kogel-adt)
       (define (iter lijst)
-        (if (not (null? (cdr lijst)))
-            (cond ((eq? kogel (cadr lijst))
+        (if (not (null? lijst))
+            (cond ((eq? kogel-adt (car lijst))
+                   (set! kogels-lijst (cdr lijst)))
+                  ((eq? kogel-adt (cadr lijst))
                    (set-cdr! lijst (cddr lijst)))
                   (else (iter (cdr lijst))))))
-      (iter kogels-lijst)
-      (display kogels-lijst)(newline))
+      (iter kogels-lijst))
 
 
     ;; dispatch functie
