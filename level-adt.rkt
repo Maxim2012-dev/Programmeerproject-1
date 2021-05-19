@@ -62,7 +62,6 @@
                 (begin ((power-up 'beweeg!))
                        (set! power-up-tijd 0))
                 (begin
-                  (display "verwijder-pu") (newline)
                   ((teken-adt 'verwijder-power-up!))
                   ((alienvloot 'reset-aantal-vernietigde-schepen!))
                   (set! power-up #f))))))
@@ -155,7 +154,8 @@
                                 (= (raket 'levens) 1))
                            (if (raket 'schild?)
                                ((kogel 'toggle-type!))
-                               (begin (set! game-over-tijd 0)
+                               (begin (verwijder-kogel! kogel)
+                                      (set! game-over-tijd 0)
                                       (set! game-over? #t))))
                           ; kogel van ALIEN raakt de raket + raket heeft meer dan 1 leven
                           ((((raket 'positie) 'gelijk?) (kogel 'positie))
@@ -179,8 +179,6 @@
     (define (creëer-power-up! alien)
       (let* ((pos-x ((alien 'positie) 'x))
              (pos-y ((alien 'positie) 'y)))
-        (display "x: ") (display pos-x) (newline)
-        (display "y: ") (display pos-y) (newline)
         (set! power-up (maak-power-up (maak-positie pos-x pos-y)))))
 
     ; Wanneer op de tab-toets wordt gedrukt als je een power-up in bezit hebt.
@@ -337,18 +335,20 @@
                  
                  ; positie van raket op startpositie
                  ((raket 'positie!) raket-start-positie)
+                 
+                 ((teken-adt 'verwijder-vloot!) alienvloot)
+                 ((teken-adt 'verwijder-kogels!) kogels)
+                 ((kogels 'maak-lijst-leeg!))
                       
                  (if volgend-level?
                           
-                     (begin ((teken-adt 'verwijder-vloot!) alienvloot)
-                            ((alienvloot 'vul-vloot!) 'willekeurig)
+                     (begin ((alienvloot 'vul-vloot!) 'willekeurig)
                             (set! volgend-level? #f))
 
                      ; alle elementen resetten (vloot, levens, raket en score)
 
                      ; vloot resetten
-                     (begin ((teken-adt 'verwijder-vloot!) alienvloot)
-                            ((alienvloot 'vul-vloot!) 'normaal)
+                     (begin ((alienvloot 'vul-vloot!) 'normaal)
                             ; levens van raket terug op 5 zetten
                             ((raket 'reset-levens!))
                             ((teken-adt 'teken-levens) raket)

@@ -5,8 +5,12 @@
 
     ; voeg-kogel-toe! : Kogel -> /
     (define (voeg-kogel-toe! kogel)
-      (set-cdr! kogels-lijst (cons kogel (cdr kogels-lijst)))
-      (display kogels-lijst)(newline))
+      (set-cdr! kogels-lijst (cons kogel (cdr kogels-lijst))))
+
+
+    ; maak-lijst-leeg! : / -> /
+    (define (maak-lijst-leeg!)
+      (set-cdr! kogels-lijst '()))
 
 
     ; voor-alle-kogels : <procedure> -> /
@@ -24,13 +28,13 @@
             (cond ((eq? kogel (cadr lijst))
                    (set-cdr! lijst (cddr lijst)))
                   (else (iter (cdr lijst))))))
-      (iter kogels-lijst)
-      (display kogels-lijst)(newline))
+      (iter kogels-lijst))
 
 
     ;; dispatch functie
     (define (dispatch-kogels msg)
       (cond ((eq? msg 'kogels-lijst) kogels-lijst)
+            ((eq? msg 'maak-lijst-leeg!) maak-lijst-leeg!)
             ((eq? msg 'voeg-kogel-toe!) voeg-kogel-toe!)
             ((eq? msg 'voor-alle-kogels) voor-alle-kogels)
             ((eq? msg 'verwijder-kogel!) verwijder-kogel!)

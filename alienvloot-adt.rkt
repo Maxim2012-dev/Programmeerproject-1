@@ -12,7 +12,8 @@
         (size vloot-size)
         (aantal-vernietigde-schepen 0)
         (onderkant-geraakt? #f)
-        (vloot-vernietigd? #f))
+        (vloot-vernietigd? #f)
+        (vlootsnelheid 1000))
     
 
     ;; Aanmaken van een matrix-datastructuur
@@ -186,6 +187,10 @@
     (define (reset-aantal-vernietigde-schepen!)
       (set! aantal-vernietigde-schepen 0))
 
+    ; reset-vlootsnelheid! : / -> /
+    (define (reset-vlootsnelheid!)
+      (set! vlootsnelheid snelheid-vloot))
+
 
     ;; dispatch-functie
     (define (dispatch-alienvloot msg)
@@ -198,9 +203,11 @@
             ((eq? msg 'vul-vloot!) vul-vloot!)
             ((eq? msg 'zet-vloot-terug!) zet-vloot-terug!)
             ((eq? msg 'onderkant-geraakt?) onderkant-geraakt?)
+            ((eq? msg 'vlootsnelheid) vlootsnelheid)
             ((eq? msg 'vloot-vernietigd?) vloot-vernietigd?)
             ((eq? msg 'reset-onderkant-geraakt!) reset-onderkant-geraakt!)
             ((eq? msg 'reset-vloot-vernietigd!) reset-vloot-vernietigd!)
+            ((eq? msg 'reset-vlootsnelheid!) reset-vlootnsnelheid!)
             ((eq? msg 'reset-aantal-vernietigde-schepen!) reset-aantal-vernietigde-schepen!) 
             (else (display "verkeerde boodschap - alienvloot"))))
     dispatch-alienvloot))

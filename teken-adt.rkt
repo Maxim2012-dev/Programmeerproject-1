@@ -14,17 +14,18 @@
 
     ;; --------------- LAGEN EN TILES ---------------
 
-    ; Raketlaag en tile 
-    (define raket-laag (scherm 'make-layer))
+    ;; Raket / Alienlaag en tiles
+
+    ; ---------> Raket <---------
+    (define raket-alien-laag (scherm 'make-layer))
     (define raket-tile
       (make-bitmap-tile "afbeeldingen/raket.png"))
-    ((raket-laag 'add-drawable) raket-tile)
-
-    ; Alienlaag 
-    (define alien-laag (scherm 'make-layer))
+    ((raket-alien-laag 'add-drawable) raket-tile)
+    
+    ; ---------> Raket <---------
     (define alien-tiles '())
 
-    ; Kogel / Power-Up-laag en tiles-lijst
+    ;; Kogel / Power-Up-laag en tiles-lijst
     (define kogel-laag (scherm 'make-layer))
     (define kogel-tiles '())
     
@@ -34,7 +35,7 @@
     ((power-up-image-tile 'set-x!) power-up-img-x)
     ((power-up-image-tile 'set-y!) power-up-img-y)
 
-    ; Score / Levenslaag en tiles
+    ;; Score / Levenslaag en tiles
     (define score-levenslaag (scherm 'make-layer))
 
     ; ---------> Score <---------
@@ -66,7 +67,7 @@
     ; ---------> Levens <---------
     (define levens-tile (make-tile 32 32))
     (define raket-image-tile (make-bitmap-tile "afbeeldingen/raket_image.png"))
-    ((levens-tile 'draw-text) "5" 20 0 0 "white")
+    ((levens-tile 'draw-text) (number->string aantal-levens-raket) 20 0 0 "white")
 
     ((score-levenslaag 'add-drawable) levens-tile)
     ((score-levenslaag 'add-drawable) raket-image-tile)
@@ -90,7 +91,7 @@
                                 ((eq? kleur 'blauw) (make-bitmap-tile "afbeeldingen/alien_blauw.png"))
                                 ((eq? kleur 'paars) (make-bitmap-tile "afbeeldingen/alien_paars.png")))))
         (set! alien-tiles (cons (cons alienschip-adt nieuwe-tile) alien-tiles))
-        ((alien-laag 'add-drawable) nieuwe-tile)
+        ((raket-alien-laag 'add-drawable) nieuwe-tile)
         nieuwe-tile))
     
 
@@ -118,8 +119,8 @@
         nieuwe-tile))
 
 
-    ;; neem-kogel : Kogel -> tile
-    (define (neem-kogel kogel-adt)
+    ;; neem-kogel! : Kogel -> tile
+    (define (neem-kogel! kogel-adt)
       (let ((resultaat (assoc kogel-adt kogel-tiles)))
         (if resultaat
             (cdr resultaat)
@@ -162,13 +163,13 @@
     ;; toggle-raket-schild! : Raket -> /
     (define (toggle-raket-schild! raket)
       (if (raket 'schild?)
-          (begin ((raket-laag 'remove-drawable) raket-tile)
+          (begin ((raket-alien-laag 'remove-drawable) raket-tile)
                  (set! raket-tile (make-bitmap-tile "afbeeldingen/raket-schild.png"))
-                 ((raket-laag 'add-drawable) raket-tile))
+                 ((raket-alien-laag 'add-drawable) raket-tile))
           (begin
-            ((raket-laag 'remove-drawable) raket-tile)
+            ((raket-alien-laag 'remove-drawable) raket-tile)
             (set! raket-tile (make-bitmap-tile "afbeeldingen/raket.png"))
-            ((raket-laag 'add-drawable) raket-tile))))
+            ((raket-alien-laag 'add-drawable) raket-tile))))
 
     ;; Spel
     ;; teken-spel! : Spel -> /
@@ -197,7 +198,7 @@
     ;; Kogel
     ;; teken-kogel! : Kogel -> /
     (define (teken-kogel! kogel)
-      (let ((tile (neem-kogel kogel)))
+      (let ((tile (neem-kogel! kogel)))
         (teken-object! kogel tile)))
 
     ;; Kogel
@@ -248,24 +249,31 @@
 
     ;; ---------------> Verwijderen <---------------
 
-    
+
+    ; alle tiles verwijderen + kogel-tiles leegmaken
+    ;; verwijder-kogels! : List -> /
+    (define (verwijder-kogels! kogels)
+      ((kogels 'voor-alle-kogels) verwijder-kogel!)
+      (set! kogel-tiles '()))
+      
     ;; verwijder-kogel! : Kogel -> /
     (define (verwijder-kogel! kogel)
-      (let ((tile (neem-kogel kogel)))
+      (let ((tile (neem-kogel! kogel)))
         ((kogel-laag 'remove-drawable) tile)))
 
+    ; alle tiles verwijderen + alien-tiles leegmaken
     ;; verwijder-vloot! : Alienvloot -> /
     (define (verwijder-vloot! alienvloot)
-      ((alienvloot 'voor-alle-schepen) verwijder-alien!))
+      ((alienvloot 'voor-alle-schepen) verwijder-alien!)
+      (set! alien-tiles '()))
 
     ;; verwijder-alien! : Alien -> /
     (define (verwijder-alien! alien)
       (let ((tile (neem-alienschip alien)))
-        ((alien-laag 'remove-drawable) tile)))
+        ((raket-alien-laag 'remove-drawable) tile)))
 
     ;; verwijder-power-up! : Power-Up -> /
-    (define (verwijder-power-up!)
-      (display power-up-tile) (newline)
+    (define (verwijder-power-up!) (newline)
       ((kogel-laag 'remove-drawable) power-up-tile)
       (set! power-up-tile #f))
 
@@ -296,6 +304,7 @@
             ((eq? msg 'teken-power-up-image) teken-power-up-image)
             ((eq? msg 'toggle-raket-schild!) toggle-raket-schild!)
             ((eq? msg 'verwijder-power-up-image!) verwijder-power-up-image!)
+            ((eq? msg 'verwijder-kogels!) verwijder-kogels!)
             ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
             ((eq? msg 'verwijder-alien!) verwijder-alien!)
             ((eq? msg 'verwijder-vloot!) verwijder-vloot!)
