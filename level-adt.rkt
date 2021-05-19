@@ -19,7 +19,6 @@
          (power-up #f)
          (power-up-tijd 0)
          (power-up-duur 0)
-         (power-up-in-bezit? #f)
          (vloot-tijd 0)
          (kogel-tijd 0))
 
@@ -55,14 +54,17 @@
     (define (beweeg-power-up!)
       (if (and power-up
                (>= power-up-tijd snelheid-power-up)
-               (not power-up-in-bezit?))
+               (not (power-up 'opgenomen?))
+               (not (power-up 'actief?)))
           (let* ((y ((power-up 'positie) 'y))
                  (raakt-rand? (((power-up 'positie) 'rand-verticaal?))))
             (if (not raakt-rand?)
                 (begin ((power-up 'beweeg!))
                        (set! power-up-tijd 0))
                 (begin
-                  ((teken-adt 'verwijder-power-up!) power-up)
+                  (display "verwijder-pu") (newline)
+                  ((teken-adt 'verwijder-power-up!))
+                  ((alienvloot 'reset-aantal-vernietigde-schepen!))
                   (set! power-up #f))))))
 
 
@@ -134,23 +136,18 @@
                                    (= (alien 'levens) 1))
                               ((alienvloot 'verhoog-vernietigde-schepen!))
                               ; checken voor power-up
-                              (display (alienvloot 'aantal-vernietigde-schepen))(newline)
                               (if (= (alienvloot 'aantal-vernietigde-schepen) aliens-power-up)
                                   (creëer-power-up! alien))
                               (bepaal-score! alien)
                               (verwijder-alienschip! alien)
-                              ; als kogel geen torpedo is...
                               (if (not (kogel 'torpedo?))
-                                  (begin (verwijder-kogel! kogel)
-                                         ((teken-adt 'verwijder-kogel!) kogel))))
+                                  (verwijder-kogel! kogel))
                              ; kogel van RAKET raakt een alien + alien heeft meer dan 1 leven
                              ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
                                    (> (alien 'levens) 1))
                               ((alien 'levens!) (- (alien 'levens) 1))
-                              ; als kogel geen torpedo is...
                               (if (not (kogel 'torpedo?))
-                                  (begin (verwijder-kogel! kogel)
-                                         ((teken-adt 'verwijder-kogel!) kogel)))))))
+                                  (verwijder-kogel! kogel)))))))
                     ; Anders doe dit...
                     ; ---------------------------------------------------------------------------------------
                     ; kogel van ALIEN raakt de raket + raket heeft 1 leven
@@ -165,9 +162,8 @@
                            (if (raket 'schild?)
                                ((kogel 'toggle-type!))
                                (begin ((raket 'verminder-levens!))
-                                      ((kogels 'verwijder-kogel!) kogel)
-                                      ((teken-adt 'verwijder-kogel!) kogel)
-                                      ((teken-adt 'teken-levens) raket))))))
+                                      ((teken-adt 'teken-levens) raket)
+                                      (verwijder-kogel! kogel))))))
                 (iter (cdr kogels-lijst)))))
         (iter kogels-lijst)))
     
@@ -183,25 +179,27 @@
     (define (creëer-power-up! alien)
       (let* ((pos-x ((alien 'positie) 'x))
              (pos-y ((alien 'positie) 'y)))
+        (display "x: ") (display pos-x) (newline)
+        (display "y: ") (display pos-y) (newline)
         (set! power-up (maak-power-up (maak-positie pos-x pos-y)))))
 
     ; Wanneer op de tab-toets wordt gedrukt als je een power-up in bezit hebt.
     ; activeer-power-up! : symbol -> /
     (define (activeer-power-up! toets)
-      (if (and power-up-in-bezit?
+      (if (and power-up
+               (power-up 'opgenomen?)
                (eq? toets '#\tab))
           (begin
             ((teken-adt 'verwijder-power-up-image!))
             ((power-up 'toggle-actief!))
-            ((alienvloot 'reset-aantal-vernietigde-schepen!))
+            ((power-up 'toggle-opgenomen!))
             (roep-power-up-op!)
             (set! power-up-duur 0))))
     
 
     ; Bepalen welke procedure moet aangeroepen worden om zo de juiste power-up te activeren
     (define (roep-power-up-op!)
-      (let ((type (power-up 'type)))
-        (display "roep-op") 
+      (let ((type (power-up 'type))) 
         (cond ((= type 1) (geef-extra-leven!))
               ((= type 2) (zet-vloot-terug!))
               ((= type 3) (toggle-schild!))
@@ -218,7 +216,7 @@
             (cond ((= type 3) (toggle-schild!))
                   ((= type 4) (toggle-upgrade!))
                   (else (display "procedure voor dit type bestaat niet (einde)")))
-            (set! power-up-in-bezit? #f)
+            ((alienvloot 'reset-aantal-vernietigde-schepen!))
             (set! power-up #f))))
     
 
@@ -227,13 +225,13 @@
     ; Checken wanneer de power-up de raket raakt
     (define (check-power-up-geraakt!)
       (if (and power-up
-               (not power-up-in-bezit?)
+               (not (power-up 'opgenomen?))
                (not (power-up 'actief?)))
           (let* ((raket-pos (raket 'positie))
                  (gelijk? ((raket-pos 'gelijk?) (power-up 'positie))))
             (if gelijk?
-                (begin (set! power-up-in-bezit? #t)
-                       ((teken-adt 'verwijder-power-up!) power-up)
+                (begin ((power-up 'toggle-opgenomen!))
+                       ((teken-adt 'verwijder-power-up!))
                        ((teken-adt 'teken-power-up-image)))))))
 
     ;; ----------> Activatieprocedures <----------
@@ -242,11 +240,15 @@
     ; Voor elke power-up een procedure die hem gaat activeren
     (define (geef-extra-leven!)
       ((raket 'voeg-leven-toe!))
-      ((teken-adt 'teken-levens) raket))
+      ((teken-adt 'teken-levens) raket)
+      ((alienvloot 'reset-aantal-vernietigde-schepen!))
+      (set! power-up #f))
 
     ; type 2
     (define (zet-vloot-terug!)
-      ((alienvloot 'zet-vloot-terug!)))
+      ((alienvloot 'zet-vloot-terug!))
+      ((alienvloot 'reset-aantal-vernietigde-schepen!))
+      (set! power-up #f))
 
     ; type 3
     (define (toggle-schild!)
@@ -263,7 +265,9 @@
                                                     ((raket 'positie) 'y))
                                           'raket)))
         ((nieuwe_kogel 'toggle-torpedo!))
-        ((kogels 'voeg-kogel-toe!) nieuwe_kogel)))
+        ((kogels 'voeg-kogel-toe!) nieuwe_kogel)
+        ((alienvloot 'reset-aantal-vernietigde-schepen!))
+        (set! power-up #f)))
         
     
 
@@ -293,13 +297,15 @@
     
 
     ; individueel alienschip verwijderen van scherm
-    (define (verwijder-alienschip! alienschip-adt)
-      ((alienvloot 'verwijder-schip!) alienschip-adt))
+    (define (verwijder-alienschip! alien)
+      ((alienvloot 'verwijder-schip!) alien)
+      ((teken-adt 'verwijder-alien!) alien))
     
 
     ; individuele kogel verwijderen van scherm
-    (define (verwijder-kogel! kogel-adt)
-      ((kogels 'verwijder-kogel!) kogel-adt))
+    (define (verwijder-kogel! kogel)
+      ((kogels 'verwijder-kogel!) kogel)
+      ((teken-adt 'verwijder-kogel!) kogel))
 
 
 
@@ -328,9 +334,7 @@
       (if (and game-over?
                (> game-over-tijd game-over-delay))
           (begin (set! game-over? #f)
-
-                 ; alle elementen resetten (vloot, levens, raket en score)
-
+                 
                  ; positie van raket op startpositie
                  ((raket 'positie!) raket-start-positie)
                       
@@ -338,16 +342,21 @@
                           
                      (begin ((teken-adt 'verwijder-vloot!) alienvloot)
                             ((alienvloot 'vul-vloot!) 'willekeurig)
-                            (set! volgend-level? #f)))
-                          
-                 ; levens van raket terug op 5 zetten
-                 ((raket 'reset-levens!))
-                 ((teken-adt 'teken-levens) raket)
+                            (set! volgend-level? #f))
 
-                 ; vergelijken met record + huidige resetten
-                 (vergelijk-met-hoogste!)
-                 ((score 'reset-score!))
-                 ((teken-adt 'teken-huidige-score) score))))
+                     ; alle elementen resetten (vloot, levens, raket en score)
+
+                     ; vloot resetten
+                     (begin ((teken-adt 'verwijder-vloot!) alienvloot)
+                            ((alienvloot 'vul-vloot!) 'normaal)
+                            ; levens van raket terug op 5 zetten
+                            ((raket 'reset-levens!))
+                            ((teken-adt 'teken-levens) raket)
+
+                            ; vergelijken met record + huidige resetten
+                            (vergelijk-met-hoogste!)
+                            ((score 'reset-score!))
+                            ((teken-adt 'teken-huidige-score) score))))))
 
 
     ;; --------------- CALLBACKS ---------------
@@ -372,7 +381,9 @@
                  (check-power-up-geraakt!)
                  (check-vloot!)))
       ; Als er een tijdsgebonden power-up is + actief is...
-      (if (and power-up (power-up 'actief?))
+      (if (and power-up
+               (power-up 'actief?)
+               (power-up 'tijdsgebonden?))
           (check-power-up-einde!)))
     
     
@@ -391,7 +402,6 @@
             ((eq? msg 'raket) raket)
             ((eq? msg 'kogels) kogels)
             ((eq? msg 'power-up) power-up)
-            ((eq? msg 'power-up-in-bezit?) power-up-in-bezit?)
             ((eq? msg 'alienvloot) alienvloot)
             (else (display "ongeldige boodschap - level-adt"))))
 

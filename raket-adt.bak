@@ -24,10 +24,6 @@
                 ((and (= x (- spel-breedte 1)) (eq? richting 'links))
                  ((positie 'beweeg!) richting))))))
 
-    
-  ; positie! : Positie -> /
-  (define (positie! nieuwe-positie)
-    (set! positie nieuwe-positie))
   
   ; rand-geraakt? : / -> boolean
   (define (rand-geraakt?)

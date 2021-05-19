@@ -5,7 +5,6 @@
 
 (define (maak-power-up positie)
   (let ((tijdsgebonden? #f)
-        (opgenomen? #f)
         (looptijd #f)
         (actief? #f)
         (type 'default))
@@ -24,27 +23,19 @@
     (define (beweeg!)
       ((positie 'beweeg!) 'omlaag))
 
-    ; toggle-actief! : / -> /
+    ; zet-actief! : / -> /
     (define (toggle-actief!)
       (if actief?
           (set! actief? #f)
           (set! actief? #t)))
 
-    ; toggle-opgenomen! : / -> /
-    (define (toggle-opgenomen!)
-      (if opgenomen?
-          (set! opgenomen? #f)
-          (set! opgenomen? #t)))
-
     (define (dispatch-power-up msg)
       (cond ((eq? msg 'positie) positie)
             ((eq? msg 'beweeg!) beweeg!)
             ((eq? msg 'looptijd) looptijd)
-            ((eq? msg 'opgenomen?) opgenomen?)
             ((eq? msg 'tijdsgebonden?) tijdsgebonden?)
             ((eq? msg 'actief?) actief?)
             ((eq? msg 'toggle-actief!) toggle-actief!)
-            ((eq? msg 'toggle-opgenomen!) toggle-opgenomen!)
             ((eq? msg 'type) type)
             (else (display "wrong-message-power-up"))))
 

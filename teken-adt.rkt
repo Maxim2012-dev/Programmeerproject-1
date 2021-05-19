@@ -111,8 +111,7 @@
     ; maakt een nieuwe tile aan en voegt deze toe aan de laag en geeft deze dan terug
     (define (voeg-kogel-toe! kogel)
       (let ((nieuwe-tile (if (kogel 'torpedo?)
-                             (begin (display "torpedo-teken")
-                                    (make-bitmap-tile "afbeeldingen/torpedo.png"))
+                             (make-bitmap-tile "afbeeldingen/torpedo.png")
                              (make-bitmap-tile "afbeeldingen/kogel.png" "afbeeldingen/kogel-mask.png"))))
         (set! kogel-tiles (cons (cons kogel nieuwe-tile) kogel-tiles))
         ((kogel-laag 'add-drawable) nieuwe-tile)
@@ -182,8 +181,7 @@
       (teken-raket! (level-adt 'raket))
       (teken-vloot! (level-adt 'alienvloot))
       (teken-kogels! (level-adt 'kogels))
-      (teken-power-up! (level-adt 'power-up)
-                       (level-adt 'power-up-in-bezit?)))
+      (teken-power-up! (level-adt 'power-up)))
 
     ;; Alienschip
     ;; teken-alienschip! : Alienschip -> /
@@ -215,15 +213,16 @@
         ((levens-tile 'draw-text) levens-tekst 20 0 0 "white")))
 
     ;; Power-Up
-    ;; teken-power-up
-    (define (teken-power-up! power-up in-bezit?)
+    ;; teken-power-up! : Power-Up -> /
+    (define (teken-power-up! power-up)
       (if (and power-up
-               (not in-bezit?))
+               (not (power-up 'opgenomen?))
+               (not (power-up 'actief?)))
           (begin (neem-power-up!)
                  (teken-object! power-up power-up-tile))))
 
     ;; Power-Up
-    ;; teken-power-up-image
+    ;; teken-power-up-image : / -> /
     (define (teken-power-up-image)
       ((kogel-laag 'add-drawable) power-up-image-tile))
 
@@ -265,11 +264,12 @@
         ((alien-laag 'remove-drawable) tile)))
 
     ;; verwijder-power-up! : Power-Up -> /
-    (define (verwijder-power-up! power-up)
-      (display "verwijderd")
+    (define (verwijder-power-up!)
+      (display power-up-tile) (newline)
       ((kogel-laag 'remove-drawable) power-up-tile)
       (set! power-up-tile #f))
 
+    ;; verwijder-power-up-image! : / -> /
     (define (verwijder-power-up-image!)
       ((kogel-laag 'remove-drawable) power-up-image-tile))
     
@@ -297,6 +297,7 @@
             ((eq? msg 'toggle-raket-schild!) toggle-raket-schild!)
             ((eq? msg 'verwijder-power-up-image!) verwijder-power-up-image!)
             ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
+            ((eq? msg 'verwijder-alien!) verwijder-alien!)
             ((eq? msg 'verwijder-vloot!) verwijder-vloot!)
             ((eq? msg 'verwijder-power-up!) verwijder-power-up!)
             (else (display "geen geldige boodschap"))))

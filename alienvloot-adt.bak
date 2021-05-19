@@ -63,7 +63,7 @@
     
 
     ; Er wordt een random-waarde berekend en slechts als deze 1 is wordt
-    ; de huidige alien op inactief gezet + buiten speelveld gezet
+    ; de huidige alien op actief gezet + buiten speelveld gezet
     ; bepaal-willekeurig : Alienschip -> /
     (define (bepaal-willekeurig! alien)
       (define random (random-integer 2))
@@ -165,11 +165,6 @@
       (set! aantal-vernietigde-schepen
             (+ aantal-vernietigde-schepen 1)))
 
-    ; snelheid-vloot -> constanten.rkt
-    ; verhoog-vlootsnelheid! : / -> /
-    (define (verhoog-vlootsnelheid!)
-      (set! snelheid-vloot (- snelheid-vloot 100)))
-
     ; roep-beweeg-op : alienschip-adt -> /
     (define (roep-beweeg-op schip-adt)
       ((schip-adt 'beweeg!) richting))
@@ -202,7 +197,7 @@
             ((eq? msg 'reset-onderkant-geraakt!) reset-onderkant-geraakt!)
             ((eq? msg 'reset-vloot-vernietigd!) reset-vloot-vernietigd!)
             ((eq? msg 'reset-aantal-vernietigde-schepen!) reset-aantal-vernietigde-schepen!) 
-            (else (display "verkeerde boodschap - alienvloot"))))
+            (else "verkeerde boodschap - alienvloot")))
     dispatch-alienvloot))
                   
               
