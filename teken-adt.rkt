@@ -24,18 +24,32 @@
       (make-bitmap-tile (string-append path "raket.png")))
     ((raket-alien-laag 'add-drawable) raket-tile)
     
-    ; ---------> Raket <---------
+    ; ---------> Alien <---------
     (define alien-tiles '())
 
     ;; Kogel / Power-Up-laag en tiles-lijst
+
+    ; ---------> Kogel <---------
     (define kogel-laag (scherm 'make-layer))
     (define kogel-tiles '())
-    
+
+    ; ---------> Power-Up <---------
     (define power-up-tile #f)
     (define power-up-image-tile (make-bitmap-tile (string-append path "power-up-image.png")))
 
     ((power-up-image-tile 'set-x!) power-up-img-x)
     ((power-up-image-tile 'set-y!) power-up-img-y)
+
+    ; ---------> Explosie <---------
+    (define explosie-tile
+      (make-tile-sequence
+       (list (make-bitmap-tile (string-append path "explosie/1-1.png"))
+             (make-bitmap-tile (string-append path "explosie/1-2.png"))
+             (make-bitmap-tile (string-append path "explosie/1-3.png"))
+             (make-bitmap-tile (string-append path "explosie/1-4.png"))
+             (make-bitmap-tile (string-append path "explosie/1-5.png"))
+             (make-bitmap-tile (string-append path "explosie/1-6.png")))))
+    ((kogel-laag 'add-drawable) explosie-tile)
 
     ;; Score / Levenslaag en tiles
     (define score-levenslaag (scherm 'make-layer))
@@ -154,24 +168,14 @@
         ((tile 'set-y!) scherm-y)))
     
 
-    ;; ---------------> Tilesequence - Explosie <---------------
-
-    (define (teken-explosie! object)
-      (let ((pos-x ((object 'positie) 'x))
-            (pos-y ((object 'positie) 'y)))
-        (define tileseq
-          (make-tile-sequence
-           (list (make-bitmap-tile (string-append path "explosie/1-1.png"))
-                 (make-bitmap-tile (string-append path "explosie/1-2.png"))
-                 (make-bitmap-tile (string-append path "explosie/1-3.png"))
-                 (make-bitmap-tile (string-append path "explosie/1-4.png"))
-                 (make-bitmap-tile (string-append path "explosie/1-5.png"))
-                 (make-bitmap-tile (string-append path "explosie/1-6.png")))))
-        ((tileseq 'set-x!) pos-x)
-        ((tileseq 'set-y!) pos-y)))
-    
-
     ;; ---------------> Tekenen <---------------
+
+    ;; Explosie
+    ;; teken-explosie! : Object -> /
+    (define (teken-explosie! object)
+      (teken-object! object explosie-tile)
+      (explosie-tile 'set-next!))
+      
     
     ;; Raket
     ;; teken-raket! : Raket -> /

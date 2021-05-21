@@ -10,6 +10,7 @@
           (maak-positie raket-start-x raket-start-y))
          (raket (maak-raket raket-start-positie))
          (alienvloot (maak-alienvloot))
+         (vlootsnelheid (alienvloot 'vlootsnelheid))
          (kogels (maak-kogels-adt))
          (score (maak-score))
          (alien-schiettijd 0)
@@ -35,9 +36,9 @@
 
     ;; beweeg-vloot! : / -> /
     (define (beweeg-vloot!)
-      (if (>= vloot-tijd snelheid-vloot)
+      (if (>= vloot-tijd (alienvloot 'vlootsnelheid))
           (begin
-            ((alienvloot 'beweeg))
+            ((alienvloot 'beweeg!))
             (set! vloot-tijd 0))))
 
 
@@ -134,7 +135,7 @@
                        (cond ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
                                    (= (alien 'levens) 1))
                               ((alienvloot 'verhoog-vernietigde-schepen!))
-                              ((teken-adt 'teken-explosie!) alien)
+                              ;((teken-adt 'teken-explosie!) alien)
                               ; checken voor power-up
                               (if (= (alienvloot 'aantal-vernietigde-schepen) aliens-power-up)
                                   (creëer-power-up! alien))
@@ -145,7 +146,7 @@
                              ; kogel van RAKET raakt een alien + alien heeft meer dan 1 leven
                              ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
                                    (> (alien 'levens) 1))
-                              ((teken-adt 'teken-explosie!) alien)
+                              ;((teken-adt 'teken-explosie!) alien)
                               ((alien 'levens!) (- (alien 'levens) 1))
                               (if (not (kogel 'torpedo?))
                                   (verwijder-kogel! kogel))))))
@@ -156,7 +157,7 @@
                                 (= (raket 'levens) 1))
                            (if (raket 'schild?)
                                ((kogel 'toggle-type!))
-                               (begin ((teken-adt 'teken-explosie!) alien)
+                               (begin ;((teken-adt 'teken-explosie!) alien)
                                       (verwijder-kogel! kogel)
                                       (set! game-over-tijd 0)
                                       (set! game-over? #t))))
@@ -164,7 +165,7 @@
                           ((((raket 'positie) 'gelijk?) (kogel 'positie))
                            (if (raket 'schild?)
                                ((kogel 'toggle-type!))
-                               (begin ((teken-adt 'teken-explosie!) alien)
+                               (begin ;((teken-adt 'teken-explosie!) kogel)
                                       ((raket 'verminder-levens!))
                                       ((teken-adt 'teken-levens) raket)
                                       (verwijder-kogel! kogel))))))
@@ -289,9 +290,9 @@
     ; bepaal-score : Alien -> /
     (define (bepaal-score! alien)
       (let ((soort-alien (alien 'kleur)))
-        (cond ((eq? soort-alien 'blauw) ((score 'verhoog-score!) 5))
-              ((eq? soort-alien 'geel) ((score 'verhoog-score!) 10))
-              ((eq? soort-alien 'paars) ((score 'verhoog-score!) 15)))
+        (cond ((eq? soort-alien 'groen) ((score 'verhoog-score!) 15))
+              ((eq? soort-alien 'geel) ((score 'verhoog-score!) 5))
+              ((eq? soort-alien 'paars) ((score 'verhoog-score!) 10)))
         ((teken-adt 'teken-huidige-score) score)))
 
 
@@ -347,12 +348,14 @@
                  (if volgend-level?
                           
                      (begin ((alienvloot 'vul-vloot!) 'willekeurig)
+                            ((alienvloot 'verhoog-vlootsnelheid!))
                             (set! volgend-level? #f))
 
                      ; alle elementen resetten (vloot, levens, raket en score)
 
                      ; vloot resetten
                      (begin ((alienvloot 'vul-vloot!) 'normaal)
+                            ((alienvloot 'reset-vlootsnelheid!))
                             ; levens van raket terug op 5 zetten
                             ((raket 'reset-levens!))
                             ((teken-adt 'teken-levens) raket)

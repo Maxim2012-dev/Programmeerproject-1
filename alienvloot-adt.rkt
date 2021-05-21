@@ -169,7 +169,8 @@
     ; snelheid-vloot -> constanten.rkt
     ; verhoog-vlootsnelheid! : / -> /
     (define (verhoog-vlootsnelheid!)
-      (set! snelheid-vloot (- snelheid-vloot 100)))
+      (if (> vlootsnelheid 300)
+          (set! vlootsnelheid (- vlootsnelheid 100))))
 
     ; roep-beweeg-op : alienschip-adt -> /
     (define (roep-beweeg-op schip-adt)
@@ -194,10 +195,11 @@
 
     ;; dispatch-functie
     (define (dispatch-alienvloot msg)
-      (cond ((eq? msg 'beweeg) beweeg!)
+      (cond ((eq? msg 'beweeg!) beweeg!)
             ((eq? msg 'schepen) schepen)
             ((eq? msg 'aantal-vernietigde-schepen) aantal-vernietigde-schepen)
             ((eq? msg 'verhoog-vernietigde-schepen!) verhoog-vernietigde-schepen!)
+            ((eq? msg 'verhoog-vlootsnelheid!) verhoog-vlootsnelheid!)
             ((eq? msg 'verwijder-schip!) verwijder-schip!)
             ((eq? msg 'voor-alle-schepen) voor-alle-schepen)
             ((eq? msg 'vul-vloot!) vul-vloot!)
