@@ -7,9 +7,9 @@
 (define venster-breedte-px (* cel-breedte-px spel-breedte))
 (define venster-hoogte-px (* cel-hoogte-px spel-hoogte))
 
-(define aantal-rijen-aliens 2)
-(define aantal-aliens-per-rij 3)
-(define aantal-levens-raket 2)
+(define aantal-rijen-aliens 5)
+(define aantal-aliens-per-rij 11)
+(define aantal-levens-raket 5)
 
 (define vloot-size aantal-rijen-aliens)
 
@@ -45,6 +45,6 @@
 (define power-up-img-x (- venster-breedte-px 80))
 (define power-up-img-y 15)
 
-(define delay-alienschot 3000)
+(define delay-alienschot 2000)
 (define game-over-delay 5000)
 (define aliens-power-up 3)

@@ -41,7 +41,15 @@
     ((power-up-image-tile 'set-y!) power-up-img-y)
 
     ; ---------> Explosie <---------
-    (define explosie-tiles '())
+    (define explosie-tile
+      (make-tile-sequence
+       (list (make-bitmap-tile (string-append path "explosie/1-1.png"))
+             (make-bitmap-tile (string-append path "explosie/1-2.png"))
+             (make-bitmap-tile (string-append path "explosie/1-3.png"))
+             (make-bitmap-tile (string-append path "explosie/1-4.png"))
+             (make-bitmap-tile (string-append path "explosie/1-5.png"))
+             (make-bitmap-tile (string-append path "explosie/1-6.png")))))
+    ((kogel-laag 'add-drawable) explosie-tile)
 
     ;; Score / Levenslaag en tiles
     (define score-levenslaag (scherm 'make-layer))
@@ -92,11 +100,12 @@
 
     ;; voeg-alienschip-toe! : Alienschip -> tile
     ; Maakt een bitmap-tile aan voor een bepaald alienschipobject
-    (define (voeg-alienschip-toe! alienschip)
-      (let* ((kleur (symbol->string (alienschip 'kleur)))
-             (nieuwe-tile (make-tile-sequence (list (make-bitmap-tile (string-append path "alien_" kleur "_omlaag.png"))
-                                                    (make-bitmap-tile (string-append path "alien_" kleur "_omhoog.png"))))))
-        (set! alien-tiles (cons (cons alienschip nieuwe-tile) alien-tiles))
+    (define (voeg-alienschip-toe! alienschip-adt)
+      (let* ((kleur (alienschip-adt 'kleur))
+             (nieuwe-tile (cond ((eq? kleur 'geel) (make-bitmap-tile (string-append path "alien_geel.png")))
+                                ((eq? kleur 'groen) (make-bitmap-tile (string-append path "alien_groen.png")))
+                                ((eq? kleur 'paars) (make-bitmap-tile (string-append path "alien_paars.png"))))))
+        (set! alien-tiles (cons (cons alienschip-adt nieuwe-tile) alien-tiles))
         ((raket-alien-laag 'add-drawable) nieuwe-tile)
         nieuwe-tile))
     
@@ -140,14 +149,6 @@
       (if (not power-up-tile)
           (begin (set! power-up-tile (make-bitmap-tile (string-append path "power-up.png")))
                  ((kogel-laag 'add-drawable) power-up-tile))))
-
-    ;; ----------> Explosies <----------
-
-    (define (voeg-explosie-toe!)
-      (let ((tile (make-bitmap-tile (string-append path "explosie.png"))))
-        (set! explosie-tiles (cons tile explosie-tiles))
-        ((kogel-laag 'add-drawable) tile)
-        tile))
     
 
 
@@ -172,8 +173,9 @@
     ;; Explosie
     ;; teken-explosie! : Object -> /
     (define (teken-explosie! object)
-      (let ((explosie-tile (voeg-explosie-toe!)))
-        (teken-object! object explosie-tile)))
+      (teken-object! object explosie-tile)
+      (explosie-tile 'set-next!))
+      
     
     ;; Raket
     ;; teken-raket! : Raket -> /
@@ -183,11 +185,14 @@
     ;; Raket
     ;; toggle-raket-schild! : Raket -> /
     (define (toggle-raket-schild! raket)
-      ((raket-alien-laag 'remove-drawable) raket-tile)
       (if (raket 'schild?)
-          (set! raket-tile (make-bitmap-tile (string-append path "raket-schild.png")))
-          (set! raket-tile (make-bitmap-tile (string-append path"raket.png"))))
-      ((raket-alien-laag 'add-drawable) raket-tile))
+          (begin ((raket-alien-laag 'remove-drawable) raket-tile)
+                 (set! raket-tile (make-bitmap-tile (string-append path "raket-schild.png")))
+                 ((raket-alien-laag 'add-drawable) raket-tile))
+          (begin
+            ((raket-alien-laag 'remove-drawable) raket-tile)
+            (set! raket-tile (make-bitmap-tile (string-append path"raket.png")))
+            ((raket-alien-laag 'add-drawable) raket-tile))))
 
     ;; Spel
     ;; teken-spel! : Spel -> /
@@ -207,13 +212,6 @@
     (define (teken-alienschip! alienschip-adt)
       (let ((tile (neem-alienschip alienschip-adt)))
         (teken-object! alienschip-adt tile)))
-
-    ;; animeer-aliens! : Alienschip -> /
-    (define (animeer-aliens! alienvloot)
-      ((alienvloot 'voor-alle-schepen)
-       (lambda (alien)
-         (let ((tile-seq (neem-alienschip alien)))
-           (tile-seq 'set-next!)))))
 
     ;; Alienvloot
     ;; teken-vloot! : Vloot -> /
@@ -298,20 +296,13 @@
         ((raket-alien-laag 'remove-drawable) tile)))
 
     ;; verwijder-power-up! : Power-Up -> /
-    (define (verwijder-power-up!)
+    (define (verwijder-power-up!) (newline)
       ((kogel-laag 'remove-drawable) power-up-tile)
       (set! power-up-tile #f))
 
     ;; verwijder-power-up-image! : / -> /
     (define (verwijder-power-up-image!)
       ((kogel-laag 'remove-drawable) power-up-image-tile))
-
-    ;; verwijder-explosies! : / -> /
-    (define (verwijder-explosies!)
-      (if (not (null? explosie-tiles))
-          (begin
-            (map (lambda (tile) ((kogel-laag 'remove-drawable) tile)) explosie-tiles) 
-            (set! explosie-tiles '()))))
     
 
     ;; --------------- CALLBACKS INSTELLEN ---------------
@@ -329,18 +320,14 @@
     (define (dispatch-teken msg)
       (cond ((eq? msg 'set-toets-functie!) set-toets-functie!)
             ((eq? msg 'set-spel-lus-functie!) set-spel-lus-functie!)
-            ;;  Tekenen
             ((eq? msg 'teken-explosie!) teken-explosie!)
-            ((eq? msg 'animeer-aliens!) animeer-aliens!)
             ((eq? msg 'teken-spel!) teken-spel!)
             ((eq? msg 'teken-huidige-score) teken-huidige-score)
             ((eq? msg 'teken-hoogste-score) teken-hoogste-score)
             ((eq? msg 'teken-levens) teken-levens)
             ((eq? msg 'teken-power-up-image) teken-power-up-image)
             ((eq? msg 'toggle-raket-schild!) toggle-raket-schild!)
-            ;;  Verwijderen
             ((eq? msg 'verwijder-power-up-image!) verwijder-power-up-image!)
-            ((eq? msg 'verwijder-explosies!) verwijder-explosies!)
             ((eq? msg 'verwijder-kogels!) verwijder-kogels!)
             ((eq? msg 'verwijder-kogel!) verwijder-kogel!)
             ((eq? msg 'verwijder-alien!) verwijder-alien!)

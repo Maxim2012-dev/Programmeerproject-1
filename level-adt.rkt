@@ -38,6 +38,8 @@
     (define (beweeg-vloot!)
       (if (>= vloot-tijd (alienvloot 'vlootsnelheid))
           (begin
+            ((teken-adt 'verwijder-explosies!))
+            ((teken-adt 'animeer-aliens!) alienvloot)
             ((alienvloot 'beweeg!))
             (set! vloot-tijd 0))))
 
@@ -69,13 +71,13 @@
 
 
     ;; roep-beweeg-op : kogel-adt -> /
-    (define (roep-beweeg-op kogel-adt)
-      (let* ((y ((kogel-adt 'positie) 'y))
-             (raakt-rand? (((kogel-adt 'positie) 'rand-verticaal?)))
-             (type-kogel (kogel-adt 'type)))
+    (define (roep-beweeg-op kogel)
+      (let* ((y ((kogel 'positie) 'y))
+             (raakt-rand? (((kogel 'positie) 'rand-verticaal?)))
+             (type-kogel (kogel 'type)))
         (if (not raakt-rand?)
-            ((kogel-adt 'beweeg!) type-kogel)
-            ((kogels 'verwijder-kogel!) kogel-adt))))
+            ((kogel 'beweeg!) type-kogel)
+            (verwijder-kogel! kogel))))
     
 
 
@@ -135,7 +137,7 @@
                        (cond ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
                                    (= (alien 'levens) 1))
                               ((alienvloot 'verhoog-vernietigde-schepen!))
-                              ;((teken-adt 'teken-explosie!) alien)
+                              ((teken-adt 'teken-explosie!) alien)
                               ; checken voor power-up
                               (if (= (alienvloot 'aantal-vernietigde-schepen) aliens-power-up)
                                   (creëer-power-up! alien))
@@ -146,7 +148,7 @@
                              ; kogel van RAKET raakt een alien + alien heeft meer dan 1 leven
                              ((and (((alien 'positie) 'gelijk?) (kogel 'positie))
                                    (> (alien 'levens) 1))
-                              ;((teken-adt 'teken-explosie!) alien)
+                              ((teken-adt 'teken-explosie!) alien)
                               ((alien 'levens!) (- (alien 'levens) 1))
                               (if (not (kogel 'torpedo?))
                                   (verwijder-kogel! kogel))))))
@@ -157,15 +159,17 @@
                                 (= (raket 'levens) 1))
                            (if (raket 'schild?)
                                ((kogel 'toggle-type!))
-                               (begin ;((teken-adt 'teken-explosie!) alien)
+                               (begin ((teken-adt 'teken-explosie!) raket)
                                       (verwijder-kogel! kogel)
+                                      ((raket 'verminder-levens!))
+                                      ((teken-adt 'teken-levens) raket)
                                       (set! game-over-tijd 0)
                                       (set! game-over? #t))))
                           ; kogel van ALIEN raakt de raket + raket heeft meer dan 1 leven
                           ((((raket 'positie) 'gelijk?) (kogel 'positie))
                            (if (raket 'schild?)
                                ((kogel 'toggle-type!))
-                               (begin ;((teken-adt 'teken-explosie!) kogel)
+                               (begin ((teken-adt 'teken-explosie!) raket)
                                       ((raket 'verminder-levens!))
                                       ((teken-adt 'teken-levens) raket)
                                       (verwijder-kogel! kogel))))))
@@ -180,7 +184,7 @@
     
     ; om de 10 vernietigde aliens een nieuwe power-up aanmaken
     ; op de positie van de laatst vernietigde alien
-    ; creëer-power-up : / -> /
+    ; creëer-power-up : Alien -> /
     (define (creëer-power-up! alien)
       (let* ((pos-x ((alien 'positie) 'x))
              (pos-y ((alien 'positie) 'y)))

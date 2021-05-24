@@ -209,7 +209,7 @@
             ((eq? msg 'vloot-vernietigd?) vloot-vernietigd?)
             ((eq? msg 'reset-onderkant-geraakt!) reset-onderkant-geraakt!)
             ((eq? msg 'reset-vloot-vernietigd!) reset-vloot-vernietigd!)
-            ((eq? msg 'reset-vlootsnelheid!) reset-vlootnsnelheid!)
+            ((eq? msg 'reset-vlootsnelheid!) reset-vlootsnelheid!)
             ((eq? msg 'reset-aantal-vernietigde-schepen!) reset-aantal-vernietigde-schepen!) 
             (else (display "verkeerde boodschap - alienvloot"))))
     dispatch-alienvloot))
