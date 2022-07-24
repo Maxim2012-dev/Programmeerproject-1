@@ -62,6 +62,7 @@
    (define current-decision-level 0)
    (define exit '())
    (define timer (new-timer)) ;; NEW
+   (define antecedents '()) ;; memorize antecedent literals (list of cons-cells)
    
    (define (make-true! lit interpret reason)
      (log-debug "Making things come TRUE:" (literal->string lit))
@@ -118,29 +119,16 @@
                 (loop))))
         #f)))
 
-   (define (remove-from-1-uip lit)
-     (let ((value (twls:reason twls lit)))
-       (if (not (eq? value 'dec))  ;; propagated literal (value = clause)
-           (let iter
-             ((antecedent (list-ref (literals value) (- (length (literals value)) 2)))
-              (ctr 3))
-             (cond ((eq? (twls:reason twls antecedent) 'dec)
-                    #f)
-                   ((marked? antecedent interpret)
-                    #t)
-                   (else (iter (list-ref (literals value) (- (length (literals value)) ctr)) (+ ctr 1)))))
-           #f)))
-
    (define (minimize-1-uip-clause confl-cls)
      ;; Mark the literals from the 1-UIP clause
      (mark-literals! interpret confl-cls)
-     (let* ((remaining-literals (remp remove-from-1-uip (literals confl-cls)))
-            (size (length remaining-literals))
-            (new-clause (make-clause remaining-literals size)))
+     ;; Recursively go through antecedents of every literal
+     (let* ((size (clause-size confl-cls)))
+       (let ((new-clause (make-clause remaining-literals size)))
          (if (empty-clause? new-clause)
              (begin (log-info "Formula is unsatisfiable")
                     (exit #f))
-             new-clause)))
+             new-clause))))
                 
                     
 
@@ -152,7 +140,9 @@
                        (cond ((false? interpret lit)
                               (exit clause)) 
                              ((unknown? interpret lit)
-                              (make-true! lit interpret clause))))))
+                              (make-true! lit interpret clause)
+                              ;; remember literal + reason
+                              (set! antecedents (cons (cons lit 'unit) antecedents)))))))
                (clauses formula))
      interpret)
 
@@ -259,7 +249,9 @@
               (let ((x (find-unassigned-atom interpret)))
                 (log-debug "Increasing dec level.")
                 (set! current-decision-level (+ current-decision-level 1))
-                (make-true! x interpret 'dec)))
+                (make-true! x interpret 'dec)
+                ;; remember literal + reason
+                (set! antecedents (cons (cons x 'dec) antecedents))))
              (else (log-info "Interpretation fully assigned, we have a solution!\n")
                    (exit interpret))))
      (cdcl-iter))

@@ -19,7 +19,7 @@
          make-clause clause? empty-clause? literals clause-size add-clause-in-form!
          make-formula formula? clauses number-of-vars number-of-clauses
          literal->string clause->string formula->string
-         true false unknown)
+         true false unknown propagated)
  (import (srfi :9)
          (rnrs base))
 
@@ -101,4 +101,7 @@
  ; Truth values
  (define true #t)
  (define false #f)
- (define unknown '()))
+ (define unknown '())
+ (define propagated #t)
+
+ )

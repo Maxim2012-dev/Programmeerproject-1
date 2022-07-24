@@ -42,8 +42,6 @@
 
  (define (interpret-size interpret)
    (vector-length (storage interpret)))
-
-;; ===========================================================================
  
  ;; Mark a single literal
  (define (mark-lit! l interpret)
@@ -57,8 +55,6 @@
    (for-all (lambda (lit)
                      (mark-lit! lit interpret))
             (literals clause)))
-
-;; ===========================================================================
 
  (define (find-unassigned-atom interpret) ; sequential search
    (let loop

@@ -9,7 +9,7 @@
 
 (define test-file "cnf-samples/example-mini.cnf")
 
-(log-set-verbosity! 'warning)
+(log-set-verbosity! 'debug)
 (define formula (parse-dimacs-file test-file))
 
 (log-debug "Checking satisfiability for formula:\n" (formula->string formula))
